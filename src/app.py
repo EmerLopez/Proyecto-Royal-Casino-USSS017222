@@ -20,9 +20,7 @@ def Display_IMG():
     Logo = os.path.join(app.config["UPLOAD_FOLDER"], "logo.png")
     return render_template("login.html",user_image = Logo)
 
-@app.route('/rmms')
-def rmms():
-    return render_template('rmms.html') 
+
 
 
  
@@ -39,8 +37,8 @@ def index():
 #---------------------------------------------------------------------------
 #funciones rmms
 
-@app.route('/')
-def home():
+@app.route('/rmms')
+def rmms():
     cursor = db.database.cursor()
     cursor.execute("SELECT * FROM rmms")
     myresult = cursor.fetchall()
@@ -72,7 +70,7 @@ def addUser():
         data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago)
         cursor.execute(sql, data)
         db.database.commit()
-    return redirect(url_for('home'))
+    return redirect(url_for('rmms'))
 
 @app.route('/delete/<string:id>')
 def delete(id):
@@ -81,7 +79,7 @@ def delete(id):
     data = (id,)
     cursor.execute(sql, data)
     db.database.commit()
-    return redirect(url_for('home'))
+    return redirect(url_for('rmms'))
 
 @app.route('/edit/<string:id>', methods=['POST'])
 def edit(id):
@@ -105,7 +103,7 @@ def edit(id):
         data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago,id)
         cursor.execute(sql, data)
         db.database.commit()
-        return redirect(url_for('home'))
+        return redirect(url_for('rmms'))
     
 #--------------------------------------------------------------------
 #r_local

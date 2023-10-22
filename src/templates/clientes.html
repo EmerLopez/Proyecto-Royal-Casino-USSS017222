@@ -7,6 +7,7 @@
     <title>Document</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <style>
+        body {background-color: #e8b542; /* color de fondo pagina */}
         .text-primary { color: #e8b542; } 
         .text-center { text-align: center; }
         .mb-5 { margin-bottom: 5rem; }
@@ -66,7 +67,7 @@
                    
                 </div>
                 <div class="col">
-                    <button class="btn btn-primary mb-3 mt-4" type="submit">Save</button>
+                    <button class="btn btn-primary mb-3 mt-4" type="submit">Guardar</button>
                 </div>
             </div>
         </form>
@@ -80,8 +81,8 @@
                 <th scope="col" class="text">Telefono</th>
                 <th scope="col" class="text">P_Pendiente</th>
                 <th scope="col" class="text">C_Reservaciones</th>
-                <th scope="col" class="text">Edit</th>
-                <th scope="col" class="text">Delete</th>
+                <th scope="col" class="text">Editar</th>
+                <th scope="col" class="text">Eliminar</th>
             </thead>
         
             <tbody>
@@ -96,8 +97,8 @@
                     <td>{{d.c_reservaciones}}</td>
                     
                     
-                    <td><button class="btn btn-primary btn-sm" id="btn-edit{{d.id}}" data-bs-toggle="modal" data-bs-target="#modal{{d.id}}">Edit</button></td>
-                    <td><a href="{{ url_for('deleteclient', id=d.id) }}" class="btn btn-danger btn-sm">Delete</a></td>
+                    <td><button class="btn btn-primary btn-sm" id="btn-edit{{d.id}}" data-bs-toggle="modal" data-bs-target="#modal{{d.id}}">Editar</button></td>
+                    <td><a href="{{ url_for('deleteclient', id=d.id) }}" class="btn btn-danger btn-sm">Eliminar</a></td>
                 </tr>
                 <!-- Modal -->
                 <div class="modal fade" id="modal{{d.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -126,8 +127,12 @@
                                         <input type="text" class="form-control mb-3" name="telefono" value="{{d.telefono}}">
                                     </div>
                                     <div class="col-3">
-                                        <label class="text-primary">P_Pendiente</label>
-                                        <input type="text" class="form-control mb-3" name="p_pendiente" value="{{d.p_pendiente}}">
+                                        <label class="text">P_Pendiente</label>
+                                        <select class="form-select mb-3" name="p_pendiente">
+                                            
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="pagado">Pagado</option>
+                                        </select>
                                     </div>
                                     <div class="col-3">
                                         <label class="text-primary">C_Reservaciones</label>
@@ -136,7 +141,7 @@
                                   
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                             </div>
                         </form>
                     </div>
