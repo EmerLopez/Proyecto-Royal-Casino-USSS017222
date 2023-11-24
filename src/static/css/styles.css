@@ -1,0 +1,97 @@
+.navbarcolor {
+  background-color: #c90302; 
+}
+
+.dorado {
+  background-color: #e8b542; 
+}
+
+.btn-custom {
+  background-color: #5D7DF0; 
+}
+
+.rojo {
+  background-color: #c90302; 
+}
+
+.gris {
+  background-color: #a4a4a4; 
+}
+.gristop {
+  margin-top: 50px;
+  background-color: #a4a4a4; 
+}
+
+.bhueso {
+  background-color: #f3f3f3; 
+}
+.contenedor {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  background-color: #f3f3f3;
+}
+
+
+.imgen {
+  width: 350px;
+  margin: 0 80px;
+}
+.imgenbtn {
+  width: 350px;
+  margin: 0 80px;
+  background-color: #e8b542;
+}
+.bfinal {
+  background-color: #a4a4a4;
+  margin-top: 50px;
+  height: 140px;
+  
+}      
+.floating-message {
+          
+          position: fixed;
+          top: 70px;
+          right: 50px;
+          background-color: #04df3b;
+          color: #fff;
+          padding: 20px;
+          border-radius: 20px;
+      }
+.text-primary { color: #e8b542; } 
+.text-center { text-align: center; }
+.mb-5 { margin-bottom: 5rem; }
+.container { background-color: #c90302; }
+.card { background-color: #a4a4a4; box-shadow: 0px 0px 10px #a4a4a4; }
+.form-control { background-color: #ffffff; }
+.btn-primary { background-color: #c90302; border-color: #a4a4a4; }
+.btn-danger { background-color: #c90302; border-color: #a4a4a4; }
+.btn-danger:hover { background-color: #a4a4a4; border-color: #a4a4a4; }
+.table-gris { background-color: #e8b542; }
+.contenedorbtn {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  
+}
+
+.imgen {
+  width: 350px;
+  margin: 0 80px;
+}
+.imgenbtn {
+  width: 350px;
+  margin: 0 80px;
+  background-color: #e8b542;
+}
+.caja{
+  margin: 10%;
+  margin-left: 35%;
+  margin-right: 35%;
+}
+.t{
+font-family: 'Lobster', cursive;
+}
+.navbarcolor {
+  background-color: #c90302; /* color navbar */
+}

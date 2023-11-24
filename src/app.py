@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Response, make_response, render_template_string
 import os
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, ValidationError
 import database as db
 from flask_mysqldb import MySQL,MySQLdb
+from jinja2 import Environment, FileSystemLoader
 
 
 template_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
@@ -9,11 +12,8 @@ template_dir = os.path.join(template_dir, 'src', 'templates')
 
 app = Flask(__name__, template_folder=template_dir)
 
-
 IMG_FOLDER = os.path.join("src", "static", "img")
 app.config["UPLOAD_FOLDER"] = IMG_FOLDER 
-
-
 
 @app.route("/")
 def Display_IMG():
@@ -21,17 +21,157 @@ def Display_IMG():
     return render_template("login.html",user_image = Logo)
 
 
-
-
- 
-
 @app.route('/cabecera')
 def cabecera():
     return render_template('cabecera.html') 
 
 @app.route('/index')
 def index():
-    return render_template('index.html') 
+    #message = "Este es un mensaje flotante"
+    #return render_template('index.html', message=message)
+ return render_template('index.html') 
+
+#--------------------------------------------------------------------------
+#MENSAJES FLOTANTES
+
+#MENSAJES CLIENTES...                                           $$$$
+
+#Cargar Clientes
+@app.route('/show_messageclient/<message>')
+def show_messageclient(message):
+  
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM clientes")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    text = 0
+    return render_template('clientes.html', data=insertObject, message=message)
+   
+#Mensaje agregar cliente:
+@app.route('/valclient',methods=['GET'])
+def valclient():
+    message = "Cliente Ingresado con Exito!"
+    return redirect(url_for('show_messageclient', message=message))
+
+#Editar cliente:
+@app.route('/msgclientedit',methods=['GET'])
+def msgclientedit():
+    message = "Cliente Editado con Exito!"
+    return redirect(url_for('show_messageclient', message=message))
+
+#Eliminar cliente:
+@app.route('/msgclientdelete',methods=['GET'])
+def msgclientdelete():
+    message = "Cliente Eliminado con Exito!"
+    return redirect(url_for('show_messageclient', message=message))
+    
+ #MENSAJES ADMINISTRADORES...                                          $$$$
+ 
+ #Cargar Administradores:
+@app.route('/show_messageadmin/<message>')
+def show_messageadmin(message):
+  
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM administrador")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    text = 0
+    return render_template('admin.html', data=insertObject, message=message)
+
+#Agregar Administrador:
+@app.route('/msgadminadd',methods=['GET'])
+def msgadminadd():
+    message = "Administrador Ingresado con Exito!"
+    return redirect(url_for('show_messageadmin', message=message))
+
+#Editar Administrador:
+@app.route('/msgadminedit',methods=['GET'])
+def msgadminedit():
+    message = "Administrador Editado con Exito!"
+    return redirect(url_for('show_messageadmin', message=message))
+
+#Eliminar Administrador:
+@app.route('/msgadmindelete',methods=['GET'])
+def msgadmindelete():
+    message = "Administrador Eliminado con Exito!"
+    return redirect(url_for('show_messageadmin', message=message))
+
+ #MENSAJES RESERVACIONES LOCAL... r_local                           $$$$
+ 
+ #Carga r_local:
+@app.route('/show_messagelocal/<message>')
+def show_messagelocal(message):
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM r_local")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return render_template('r_local.html', data=insertObject, message=message)
+
+#Agregar r_local:
+@app.route('/msglocaladd',methods=['GET'])
+def msglocaladd():
+    message = "Reservacion Ingresada con Exito!"
+    return redirect(url_for('show_messagelocal', message=message))
+
+#Editar r_local:
+@app.route('/msglocaledit',methods=['GET'])
+def msglocaledit():
+    message = "Reservacion Editada con Exito!"
+    return redirect(url_for('show_messagelocal', message=message))
+
+#Eliminar r_local:
+@app.route('/msglocaldelete',methods=['GET'])
+def msglocaldelete():
+    message = "Reservacion Eliminada con Exito!"
+    return redirect(url_for('show_messagelocal', message=message))
+
+#MENSAJES RESERVACIONES DE Mesas, Manteles, ETC... rmms                 $$$
+ 
+ #Carga rmms:
+@app.route('/show_messagermms/<message>')
+def show_messagermms(message):
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM rmms")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return render_template('rmms.html', data=insertObject, message=message)
+
+#Agregar rmms:
+@app.route('/msgrmmsadd',methods=['GET'])
+def msgrmmsadd():
+    message = "Reservacion Ingresada con Exito!"
+    return redirect(url_for('show_messagermms', message=message))
+
+#Editar rmms:
+@app.route('/msgrmmsedit',methods=['GET'])
+def msgrmmsedit():
+    message = "Reservacion Editada con Exito!"
+    return redirect(url_for('show_messagermms', message=message))
+
+#Eliminar rmms:
+@app.route('/msgrmmsdelete',methods=['GET'])
+def msgrmmsdelete():
+    message = "Reservacion Eliminada con Exito!"
+    return redirect(url_for('show_messagermms', message=message))
+
+#-----------------------------------------------------------------------------------
+     
 
 
 #---------------------------------------------------------------------------
@@ -70,7 +210,7 @@ def addUser():
         data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago)
         cursor.execute(sql, data)
         db.database.commit()
-    return redirect(url_for('rmms'))
+    return redirect(url_for('msgrmmsadd'))
 
 @app.route('/delete/<string:id>')
 def delete(id):
@@ -79,7 +219,7 @@ def delete(id):
     data = (id,)
     cursor.execute(sql, data)
     db.database.commit()
-    return redirect(url_for('rmms'))
+    return redirect(url_for('msgrmmsdelete'))
 
 @app.route('/edit/<string:id>', methods=['POST'])
 def edit(id):
@@ -103,7 +243,7 @@ def edit(id):
         data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago,id)
         cursor.execute(sql, data)
         db.database.commit()
-        return redirect(url_for('rmms'))
+        return redirect(url_for('msgrmmsedit'))
     
 #--------------------------------------------------------------------
 #r_local
@@ -138,7 +278,7 @@ def addUserlocal():
         data = (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago)
         cursor.execute(sql, data)
         db.database.commit()
-    return redirect(url_for('local'))
+    return redirect(url_for('msglocaladd'))
 
 @app.route('/deletelocal/<string:id>')
 def deletelocal(id):
@@ -147,7 +287,7 @@ def deletelocal(id):
     data = (id,)
     cursor.execute(sql, data)
     db.database.commit()
-    return redirect(url_for('local'))
+    return redirect(url_for('msglocaldelete'))
 
 @app.route('/editlocal/<string:id>', methods=['POST'])
 def editlocal(id):
@@ -167,14 +307,12 @@ def editlocal(id):
         data = (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago, id)
         cursor.execute(sql, data)
         db.database.commit()
-        return redirect(url_for('local'))
+        return redirect(url_for('msglocaledit'))
 
 #-------------------------------------------------------------------------
 #login
 
 cursor = db.database.cursor()
-
-
 
 @app.route('/acceso-login', methods=['POST'])
 def login_post():
@@ -187,15 +325,23 @@ def login_post():
 
     if result:
         session['correo'] = correo
-        return redirect(url_for('index'))
+        message = "Inicio de Sesion con Exito!"
+        return render_template('index.html', message=message)
+    elif(correo == ''or password == ''):
+        return render_template('login.html',mensaje="Campos vacios, ingrese sus credenciales")
     else:
-        return 'Credenciales incorrectas. Inténtalo de nuevo.' 
-#Login--------------------------------------
+        return render_template('login.html',mensaje="Usuario o Contraseña Incorrecta, Intentelo de nuevo")
+     
+     
+      
+#--------------------------------------
 
 
 
 #--------------------------------------------------------------------------------
 #Administradores
+
+
 @app.route('/admin')
 def admin():
     cursor = db.database.cursor()
@@ -206,7 +352,7 @@ def admin():
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
-    return render_template('admin.html', data=insertObject)
+    return render_template('admin.html', data=insertObject)   
 
 
 @app.route('/useradmin', methods=['POST'])
@@ -220,7 +366,7 @@ def useradmin():
         data = ( correo, password)
         cursor.execute(sql, data)
         db.database.commit()
-    return redirect(url_for('admin'))
+    return redirect(url_for('msgadminadd'))
 
 @app.route('/deleteadmin/<string:id>')
 def deleteadmin(id):
@@ -229,7 +375,7 @@ def deleteadmin(id):
     data = (id,)
     cursor.execute(sql, data)
     db.database.commit()
-    return redirect(url_for('admin'))
+    return redirect(url_for('msgadmindelete'))
     
 @app.route('/editadmin/<string:id>', methods=['POST'])
 def editadmin(id):
@@ -243,7 +389,7 @@ def editadmin(id):
        data = (correo, password, id)
        cursor.execute(sql, data)
        db.database.commit()
-     return redirect(url_for('admin'))
+     return redirect(url_for('msgadminedit'))
 #--------------------------------------------------------------------------------------
 #Clientes
 
@@ -276,8 +422,9 @@ def userclient():
         data = (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones)
         cursor.execute(sql, data)
         db.database.commit()
-    return redirect(url_for('clientes'))
-
+       
+    return redirect(url_for('valclient'))
+    
 @app.route('/deleteclient/<string:id>')
 def deleteclient(id):
     cursor = db.database.cursor()
@@ -285,7 +432,7 @@ def deleteclient(id):
     data = (id,)
     cursor.execute(sql, data)
     db.database.commit()
-    return redirect(url_for('clientes'))
+    return redirect(url_for('msgclientdelete'))
 
 @app.route('/editclient/<string:id>', methods=['POST'])
 def editclient(id):
@@ -297,16 +444,17 @@ def editclient(id):
     c_reservaciones = request.form['c_reservaciones']
     
 
-    if nombres and apellidos and DUI and telefono and p_pendiente and  c_reservaciones :
+    if nombres and apellidos and DUI and telefono and p_pendiente and  c_reservaciones:
         cursor = db.database.cursor()
         sql = "UPDATE clientes SET nombres=%s, apellidos=%s, DUI=%s, telefono=%s, p_pendiente=%s, c_reservaciones=%s WHERE id=%s"
 
         data = (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones, id)
         cursor.execute(sql, data)
         db.database.commit()
-        return redirect(url_for('clientes'))
+        return redirect(url_for('msgclientedit'))
 #----------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.secret_key = "12345"
     app.run(debug=True, port=7000)
+    
