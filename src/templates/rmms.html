@@ -34,10 +34,30 @@
 <script>
     function confirmDelete(id) {
         if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
-            window.location.href = "/delete/" + id;
+            window.location.href = "/deletelocal/" + id;
         }
     }
+    function search() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("dataTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[2]; // Cambiar el índice según la columna que desees buscar
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
 </script>
+
   <h1 class="text-center mt-5 mb-5 text">Alquiler Sillas|Mesas|Manteles</h1>  
 
   <div class="container">
@@ -116,10 +136,15 @@
                 <div class="col">
                     <button class="btn btn-primary mb-3 mt-4" type="submit">Guardar</button>
                 </div>
+                <div class="mb-3">
+                    <label class="text">Buscar:</label>
+                    <input type="text" class="form-control mb-3" id="searchInput" onkeyup="search()" placeholder=" ">
+                </div>
+               
             </div>
         </form>
         
-        <table class="table table-bordered table-gris">
+        <table id="dataTable" class="table table-bordered table-gris">
             <thead>
                 <th scope="col" class="text">#</th>
                 <th scope="col" class="text">TipoReservacion</th>
@@ -220,6 +245,7 @@
                                     <div class="col-3">
                                         <label class="text">Pago</label>
                                         <select class="form-select mb-3" name="pago" value="{{d.pago}}">
+                                            <option value="pendiente"></option>
                                             <option value="pendiente">Pendiente</option>
                                             <option value="pagado">Pagado</option>
                                         </select>

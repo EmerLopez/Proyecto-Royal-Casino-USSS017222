@@ -36,11 +36,31 @@
 
 <script>
     function confirmDelete(id) {
-        if (confirm("¿Estás seguro de que quieres eliminar este administrador?")) {
-            window.location.href = "/deleteadmin/" + id;
+        if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
+            window.location.href = "/deletelocal/" + id;
         }
     }
+    function search() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("dataTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Cambiar el índice según la columna que desees buscar
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
 </script>
+
 
   <h1 class="text-center mt-5 mb-5 text">Registro de Administradores</h1>  
 
@@ -69,11 +89,16 @@
                     <div class="col">
                             <button class="btn btn-primary mb-3 mt-4" type="submit">Guardar</button>
                         </div>
+                        <div class="mb-3">
+                            <label class="text">Buscar:</label>
+                            <input type="text" class="form-control mb-3" id="searchInput" onkeyup="search()" placeholder=" ">
+                        </div>
+                        
                     </div>
                 </div>
             </form>
             
-            <table class="table table-bordered table-gris"> <!-- Agregar la clase table-gris a la tabla -->
+            <table id="dataTable" class="table table-bordered table-gris"> <!-- Agregar la clase table-gris a la tabla -->
                 <thead>
                     <th scope="col" class="text">#</th>
                     <th scope="col" class="text">Correo</th>

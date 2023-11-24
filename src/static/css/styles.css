@@ -95,3 +95,13 @@ font-family: 'Lobster', cursive;
 .navbarcolor {
   background-color: #c90302; /* color navbar */
 }
+.floating-messagev {
+          
+  position: fixed;
+  top: 70px;
+  right: 50px;
+  background-color: #c90302;
+  color: #fff;
+  padding: 20px;
+  border-radius: 20px;
+}

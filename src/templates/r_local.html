@@ -36,7 +36,28 @@
             window.location.href = "/deletelocal/" + id;
         }
     }
+    function search() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("dataTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Cambiar el índice según la columna que desees buscar
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
 </script>
+
+
 
 <body>
     
@@ -71,6 +92,7 @@
                 </div>
                 <div class="col-3 form-floating">
                     <select class="form-select mb-3" name="t_reservacion" required>
+                        <option value="Local"></option>
                         <option value="Local">Local</option>
                         <option value="Extras">Extras</option>
                     </select>
@@ -89,6 +111,7 @@
 
                 <div class="col-3 form-floating">
                     <select class="form-select mb-3" name="pago" required>
+                        <option value="Local"></option>
                         <option value="Pagado">Pagado</option>
                         <option value="Pendiente">Pendiente</option>
                     </select>
@@ -98,11 +121,19 @@
                 <div class="col">
                     <button class="btn btn-primary mb-3 mt-4" type="submit">Guardar</button>
                 </div>
+                
+                <div class="mb-3">
+                    <label class="text">Buscar:</label>
+                    <input type="text" class="form-control mb-3" id="searchInput" onkeyup="search()" placeholder=" ">
+                </div>
+                
+                
+          
 
             </div>
         </form>
         
-        <table class="table table-bordered table-gris">
+        <table id="dataTable"  class="table table-bordered table-gris">
             <thead>
                 <th scope="col" class="text">#</th>
                 <th scope="col" class="text">Nombre</th>

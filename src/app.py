@@ -4,6 +4,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
 import database as db
 from flask_mysqldb import MySQL,MySQLdb
+import json
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -137,6 +138,12 @@ def msglocaldelete():
     message = "Reservacion Eliminada con Exito!"
     return redirect(url_for('show_messagelocal', message=message))
 
+#Validacion de fecha r_local:
+@app.route('/vallocaladd',methods=['GET'])
+def vallocaladd():
+    message = "Error al Guardar, fecha no disponible! "
+    return redirect(url_for('show_messagelocal', message=message))
+
 #MENSAJES RESERVACIONES DE Mesas, Manteles, ETC... rmms                 $$$
  
  #Carga rmms:
@@ -170,6 +177,12 @@ def msgrmmsdelete():
     message = "Reservacion Eliminada con Exito!"
     return redirect(url_for('show_messagermms', message=message))
 
+#Val fecha rmms:
+@app.route('/valrmmsadd',methods=['GET'])
+def valrmmsadd():
+    message = "Error al Guardar, fecha no disponible!"
+    return redirect(url_for('show_messagermms', message=message))
+
 #-----------------------------------------------------------------------------------
      
 
@@ -179,15 +192,28 @@ def msgrmmsdelete():
 
 @app.route('/rmms')
 def rmms():
+   
+    search_term = request.args.get('search', '')  # Obtener el término de búsqueda de la URL
     cursor = db.database.cursor()
-    cursor.execute("SELECT * FROM rmms")
+
+    if search_term:
+        # Filtrar resultados si hay un término de búsqueda
+        sql = "SELECT * FROM rmms WHERE nombres LIKE %s "
+        data = ('%' + search_term + '%', '%' + search_term + '%')
+        cursor.execute(sql, data)
+    else:
+        # Consulta sin filtrar si no hay término de búsqueda
+        cursor.execute("SELECT * FROM rmms")
+
     myresult = cursor.fetchall()
     insertObject = []
     columnNames = [column[0] for column in cursor.description]
+    
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+
     cursor.close()
-    return render_template('rmms.html', data=insertObject)
+    return render_template('rmms.html', data=insertObject, search_term=search_term)
 
 @app.route('/user', methods=['POST'])
 def addUser():
@@ -202,14 +228,42 @@ def addUser():
     c_manteles = request.form['c_manteles']
     total = request.form['total']
     pago = request.form['pago']
+    p_pendiente = request.form['pago']
     
-    if t_reservacion and nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
+    cursor = db.database.cursor()
+    Cnombre = nombres
+    select_query = "SELECT nombres, c_reservaciones FROM clientes WHERE nombres = %s"
+    cursor.execute(select_query, (Cnombre,))
+    result = cursor.fetchone()
+    
+    consulta = "SELECT * FROM rmms WHERE fecha = %s"
+    valores = (fecha,)
+    cursor.execute(consulta, valores)
+    resultado = cursor.fetchone()
+    
+    if resultado:
+       return redirect(url_for('valrmmsadd')) 
+       
+    else:
+        if result:
+            NID, cantidad = result
+            Ncantidad = cantidad + 1
+            update_query = "UPDATE clientes SET c_reservaciones = %s WHERE nombres = %s"
+            cursor.execute(update_query, (Ncantidad, NID,))
+            db.database.commit()
+            
+        elif t_reservacion and nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
+            cursor = db.database.cursor()
+            sql = "INSERT INTO clientes (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones) VALUES (%s, %s, %s, %s, %s, 1)"
+            data = (nombres, apellidos, DUI, telefono, p_pendiente )
+            cursor.execute(sql, data)
+            db.database.commit()
+            
         cursor = db.database.cursor()
         sql = "INSERT INTO rmms (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-
         data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago)
         cursor.execute(sql, data)
-        db.database.commit()
+        db.database.commit() 
     return redirect(url_for('msgrmmsadd'))
 
 @app.route('/delete/<string:id>')
@@ -250,15 +304,27 @@ def edit(id):
 
 @app.route('/r_local')
 def local():
+    search_term = request.args.get('search', '')  # Obtener el término de búsqueda de la URL
     cursor = db.database.cursor()
-    cursor.execute("SELECT * FROM r_local")
+
+    if search_term:
+        # Filtrar resultados si hay un término de búsqueda
+        sql = "SELECT * FROM r_local WHERE nombres LIKE %s "
+        data = ('%' + search_term + '%', '%' + search_term + '%')
+        cursor.execute(sql, data)
+    else:
+        # Consulta sin filtrar si no hay término de búsqueda
+        cursor.execute("SELECT * FROM r_local")
+
     myresult = cursor.fetchall()
     insertObject = []
     columnNames = [column[0] for column in cursor.description]
+    
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+
     cursor.close()
-    return render_template('r_local.html', data=insertObject)
+    return render_template('r_local.html', data=insertObject, search_term=search_term)
 
 @app.route('/userlocal', methods=['POST'])
 def addUserlocal():
@@ -270,15 +336,47 @@ def addUserlocal():
     fecha = request.form['fecha']
     total = request.form['total']
     pago = request.form['pago']
+    p_pendiente = request.form['pago']
     
+    cursor = db.database.cursor()
+    Cnombre = nombres
+    select_query = "SELECT nombres, c_reservaciones FROM clientes WHERE nombres = %s"
+    cursor.execute(select_query, (Cnombre,))
+    result = cursor.fetchone()
     
-    if nombres and apellidos and DUI and telefono and t_reservacion and fecha and total and pago :
+    consulta = "SELECT * FROM r_local WHERE fecha = %s"
+    valores = (fecha,)
+    cursor.execute(consulta, valores,)
+    resultado = cursor.fetchone()
+    
+    #R_local
+    if resultado:
+       return redirect(url_for('vallocaladd'))   
+    else:        
+        if result:
+            NID, cantidad = result
+            Ncantidad = cantidad + 1
+            update_query = "UPDATE clientes SET c_reservaciones = %s WHERE nombres = %s"
+            cursor.execute(update_query, (Ncantidad, NID,))
+            db.database.commit()
+            
+        elif nombres and apellidos and DUI and telefono and t_reservacion and fecha and total and pago and p_pendiente: 
+            cursor = db.database.cursor()
+            sql = "INSERT INTO clientes (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones) VALUES (%s, %s, %s, %s, %s, 1)"
+            data = (nombres, apellidos, DUI, telefono, p_pendiente )
+            cursor.execute(sql, data)
+            db.database.commit()
+            
         cursor = db.database.cursor()
         sql = "INSERT INTO r_local (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         data = (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago)
         cursor.execute(sql, data)
-        db.database.commit()
+        db.database.commit() 
+        del resultado
     return redirect(url_for('msglocaladd'))
+    
+    
+        
 
 @app.route('/deletelocal/<string:id>')
 def deletelocal(id):
@@ -336,23 +434,34 @@ def login_post():
       
 #--------------------------------------
 
-
-
 #--------------------------------------------------------------------------------
 #Administradores
 
 
 @app.route('/admin')
 def admin():
+     
+    search_term = request.args.get('search', '')  # Obtener el término de búsqueda de la URL
     cursor = db.database.cursor()
-    cursor.execute("SELECT * FROM administrador")
+
+    if search_term:
+        # Filtrar resultados si hay un término de búsqueda
+        sql = "SELECT * FROM administrador WHERE correo LIKE %s "
+        data = ('%' + search_term + '%', '%' + search_term + '%')
+        cursor.execute(sql, data)
+    else:
+        # Consulta sin filtrar si no hay término de búsqueda
+        cursor.execute("SELECT * FROM administrador")
+
     myresult = cursor.fetchall()
     insertObject = []
     columnNames = [column[0] for column in cursor.description]
+    
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+
     cursor.close()
-    return render_template('admin.html', data=insertObject)   
+    return render_template('admin.html', data=insertObject, search_term=search_term) 
 
 
 @app.route('/useradmin', methods=['POST'])
@@ -395,15 +504,27 @@ def editadmin(id):
 
 @app.route('/clientes')
 def clientes():
+    search_term = request.args.get('search', '')  # Obtener el término de búsqueda de la URL
     cursor = db.database.cursor()
-    cursor.execute("SELECT * FROM clientes")
+
+    if search_term:
+        # Filtrar resultados si hay un término de búsqueda
+        sql = "SELECT * FROM clientes WHERE nombres LIKE %s "
+        data = ('%' + search_term + '%', '%' + search_term + '%')
+        cursor.execute(sql, data)
+    else:
+        # Consulta sin filtrar si no hay término de búsqueda
+        cursor.execute("SELECT * FROM clientes")
+
     myresult = cursor.fetchall()
     insertObject = []
     columnNames = [column[0] for column in cursor.description]
+    
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+
     cursor.close()
-    return render_template('clientes.html', data=insertObject)
+    return render_template('clientes.html', data=insertObject, search_term=search_term)
 
 
 @app.route('/userclient', methods=['POST'])
@@ -454,7 +575,9 @@ def editclient(id):
         return redirect(url_for('msgclientedit'))
 #----------------------------------------------------------------------------------
 
+
 if __name__ == '__main__':
     app.secret_key = "12345"
     app.run(debug=True, port=7000)
     
+#----------------------------------------------------------------------------------
