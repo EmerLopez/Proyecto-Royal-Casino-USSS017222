@@ -1,17 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, Response, make_response, render_template_string
 import os
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, ValidationError
 import database as db
 from flask_mysqldb import MySQL,MySQLdb
 import json
 from jinja2 import Environment, FileSystemLoader
 
 
+
 template_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 template_dir = os.path.join(template_dir, 'src', 'templates')
 
 app = Flask(__name__, template_folder=template_dir)
+
 
 IMG_FOLDER = os.path.join("src", "static", "img")
 app.config["UPLOAD_FOLDER"] = IMG_FOLDER 
@@ -32,10 +32,26 @@ def index():
     #return render_template('index.html', message=message)
  return render_template('index.html') 
 
+
 #--------------------------------------------------------------------------
 #MENSAJES FLOTANTES
 
 #MENSAJES CLIENTES...                                           $$$$
+
+#Cargar Clientes Campos en Blanco
+@app.route('/show_messageclientwhite/<mensaje_error>')
+def show_messageclientwhite(mensaje_error):
+  
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM clientes")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    text = 0
+    return render_template('clientes.html', data=insertObject, mensaje_error=mensaje_error)
 
 #Cargar Clientes
 @app.route('/show_messageclient/<message>')
@@ -69,8 +85,29 @@ def msgclientedit():
 def msgclientdelete():
     message = "Cliente Eliminado con Exito!"
     return redirect(url_for('show_messageclient', message=message))
+
+#Validacion campos en blanco:
+@app.route('/valclientwhite',methods=['GET'])
+def valclientwhite():
+    mensaje_error = "Error: Campos en blanco, llena todos los campos"
+    return redirect(url_for('show_messageclientwhite', mensaje_error=mensaje_error))
     
  #MENSAJES ADMINISTRADORES...                                          $$$$
+ 
+  #Cargar Campos en blanco Administradores:
+@app.route('/show_messageadminwhite/<mensaje_error>')
+def show_messageadminwhite(mensaje_error):
+  
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM administrador")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    text = 0
+    return render_template('admin.html', data=insertObject, mensaje_error=mensaje_error, msg='No existe el Carro', tipo=1)
  
  #Cargar Administradores:
 @app.route('/show_messageadmin/<message>')
@@ -105,7 +142,26 @@ def msgadmindelete():
     message = "Administrador Eliminado con Exito!"
     return redirect(url_for('show_messageadmin', message=message))
 
+#Validar Campo en blanco:
+@app.route('/whiteadmindelete',methods=['GET'])
+def whiteadmindelete():
+    mensaje_error = "Error: Campos en blanco, llena todos los campos"
+    return redirect(url_for('show_messageadminwhite', mensaje_error=mensaje_error))
+
  #MENSAJES RESERVACIONES LOCAL... r_local                           $$$$
+ 
+ #Carga error r_local:
+@app.route('/show_messagelocale/<mensaje_error>')
+def show_messagelocale(mensaje_error):
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM r_local")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return render_template('r_local.html', data=insertObject, mensaje_error=mensaje_error)
  
  #Carga r_local:
 @app.route('/show_messagelocal/<message>')
@@ -141,10 +197,30 @@ def msglocaldelete():
 #Validacion de fecha r_local:
 @app.route('/vallocaladd',methods=['GET'])
 def vallocaladd():
-    message = "Error al Guardar, fecha no disponible! "
-    return redirect(url_for('show_messagelocal', message=message))
+    mensaje_error = "Error al Guardar, fecha no disponible! "
+    #return render_template('rmms.html', message_error=message_error)
+    return redirect(url_for('show_messagelocale', mensaje_error=mensaje_error))
+
+#Validacion de campos en blanco r_local:
+@app.route('/whitelocaladd',methods=['GET'])
+def whitelocaladd():
+    mensaje_error = "Error: Campos en blanco, llena todos los campos"
+    return redirect(url_for('show_messagelocale', mensaje_error=mensaje_error))
 
 #MENSAJES RESERVACIONES DE Mesas, Manteles, ETC... rmms                 $$$
+
+#Carga Error rmms:
+@app.route('/show_messagermmsv/<mensaje_error>')
+def show_messagermmsv(mensaje_error):
+    cursor = db.database.cursor()
+    cursor.execute("SELECT * FROM rmms")
+    myresult = cursor.fetchall()
+    insertObject = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return render_template('rmms.html', data=insertObject,mensaje_error=mensaje_error)
  
  #Carga rmms:
 @app.route('/show_messagermms/<message>')
@@ -180,8 +256,14 @@ def msgrmmsdelete():
 #Val fecha rmms:
 @app.route('/valrmmsadd',methods=['GET'])
 def valrmmsadd():
-    message = "Error al Guardar, fecha no disponible!"
-    return redirect(url_for('show_messagermms', message=message))
+    mensaje_error = "Error al Guardar, fecha no disponible!"
+    return redirect(url_for('show_messagermmsv', mensaje_error=mensaje_error))
+
+#Val campos en blanco rmms:
+@app.route('/valrmmswhite',methods=['GET'])
+def valrmmswhite():
+    mensaje_error = "Error: Campos en blanco, llena todos los campos"
+    return redirect(url_for('show_messagermmsv', mensaje_error=mensaje_error))
 
 #-----------------------------------------------------------------------------------
      
@@ -217,33 +299,36 @@ def rmms():
 
 @app.route('/user', methods=['POST'])
 def addUser():
-    t_reservacion = request.form['t_reservacion']
-    nombres = request.form['nombres']
-    apellidos = request.form['apellidos']
-    DUI = request.form['DUI']
-    telefono = request.form['telefono']
-    fecha = request.form['fecha']
-    c_mesas = request.form['c_mesas']
-    c_sillas = request.form['c_sillas']
-    c_manteles = request.form['c_manteles']
-    total = request.form['total']
-    pago = request.form['pago']
-    p_pendiente = request.form['pago']
-    
+    t_reservacion = request.form['t_reservacion'].strip()
+    nombres = request.form['nombres'].strip()
+    apellidos = request.form['apellidos'].strip()
+    DUI = request.form['DUI'].strip()
+    telefono = request.form['telefono'].strip()
+    fecha = request.form['fecha'].strip()
+    c_mesas = request.form['c_mesas'].strip()
+    c_sillas = request.form['c_sillas'].strip()
+    c_manteles = request.form['c_manteles'].strip()
+    total = request.form['total'].strip()
+    pago = request.form['pago'].strip()
+    p_pendiente = request.form['pago'].strip()
+
+    # Verifica si alguna de las variables después de aplicar strip() está vacía
+    if not all([t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago]):
+        return redirect(url_for('valrmmswhite'))
+
     cursor = db.database.cursor()
     Cnombre = nombres
     select_query = "SELECT nombres, c_reservaciones FROM clientes WHERE nombres = %s"
     cursor.execute(select_query, (Cnombre,))
     result = cursor.fetchone()
-    
+
     consulta = "SELECT * FROM rmms WHERE fecha = %s"
     valores = (fecha,)
     cursor.execute(consulta, valores)
     resultado = cursor.fetchone()
-    
+
     if resultado:
-       return redirect(url_for('valrmmsadd')) 
-       
+        return redirect(url_for('valrmmsadd'))
     else:
         if result:
             NID, cantidad = result
@@ -269,10 +354,23 @@ def addUser():
 @app.route('/delete/<string:id>')
 def delete(id):
     cursor = db.database.cursor()
-    sql = "DELETE FROM rmms WHERE id=%s"
-    data = (id,)
-    cursor.execute(sql, data)
-    db.database.commit()
+    select_query = "SELECT nombres FROM rmms WHERE id = %s"
+    cursor.execute(select_query, (id,))
+    result = cursor.fetchone()
+
+    if result:
+        cliente_nombre = result[0]
+
+        # Resta 1 a la cantidad de reservaciones del cliente
+        update_query = "UPDATE clientes SET c_reservaciones = c_reservaciones - 1 WHERE nombres = %s"
+        cursor.execute(update_query, (cliente_nombre,))
+        db.database.commit()
+
+        # Elimina el registro de r_local
+        delete_query = "DELETE FROM rmms WHERE id=%s"
+        cursor.execute(delete_query, (id,))
+        db.database.commit()
+   
     return redirect(url_for('msgrmmsdelete'))
 
 @app.route('/edit/<string:id>', methods=['POST'])
@@ -328,15 +426,18 @@ def local():
 
 @app.route('/userlocal', methods=['POST'])
 def addUserlocal():
-    nombres = request.form['nombres']
-    apellidos = request.form['apellidos']
-    DUI = request.form['DUI']
-    telefono = request.form['telefono']
-    t_reservacion = request.form['t_reservacion']
-    fecha = request.form['fecha']
-    total = request.form['total']
-    pago = request.form['pago']
-    p_pendiente = request.form['pago']
+    nombres = request.form['nombres'].strip()
+    apellidos = request.form['apellidos'].strip()
+    DUI = request.form['DUI'].strip()
+    telefono = request.form['telefono'].strip()
+    t_reservacion = request.form['t_reservacion'].strip()
+    fecha = request.form['fecha'].strip()
+    total = request.form['total'].strip()
+    pago = request.form['pago'].strip()
+    p_pendiente = request.form['pago'].strip()
+    
+    if not all([nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago , p_pendiente]):
+        return redirect(url_for('valrmmswhite'))
     
     cursor = db.database.cursor()
     Cnombre = nombres
@@ -381,11 +482,24 @@ def addUserlocal():
 @app.route('/deletelocal/<string:id>')
 def deletelocal(id):
     cursor = db.database.cursor()
-    sql = "DELETE FROM r_local WHERE id=%s"
-    data = (id,)
-    cursor.execute(sql, data)
-    db.database.commit()
-    return redirect(url_for('msglocaldelete'))
+    select_query = "SELECT nombres FROM r_local WHERE id = %s"
+    cursor.execute(select_query, (id,))
+    result = cursor.fetchone()
+
+    if result:
+        cliente_nombre = result[0]
+
+        # Resta 1 a la cantidad de reservaciones del cliente
+        update_query = "UPDATE clientes SET c_reservaciones = c_reservaciones - 1 WHERE nombres = %s"
+        cursor.execute(update_query, (cliente_nombre,))
+        db.database.commit()
+
+        # Elimina el registro de r_local
+        delete_query = "DELETE FROM r_local WHERE id=%s"
+        cursor.execute(delete_query, (id,))
+        db.database.commit()
+
+        return redirect(url_for('msglocaldelete'))
 
 @app.route('/editlocal/<string:id>', methods=['POST'])
 def editlocal(id):
@@ -466,8 +580,12 @@ def admin():
 
 @app.route('/useradmin', methods=['POST'])
 def useradmin():
-    correo = request.form['correo']
-    password = request.form['password']
+    correo = request.form['correo'].strip()
+    password = request.form['password'].strip()
+    
+     # Verifica si alguna de las variables después de aplicar strip() está vacía
+    if not all([correo, password]):
+        return redirect(url_for('whiteadmindelete'))
     
     if correo and password:
         cursor=db.database.cursor()
@@ -529,12 +647,16 @@ def clientes():
 
 @app.route('/userclient', methods=['POST'])
 def userclient():
-    nombres = request.form['nombres']
-    apellidos = request.form['apellidos']
-    DUI = request.form['DUI']
-    telefono = request.form['telefono']
-    p_pendiente = request.form['p_pendiente']
-    c_reservaciones = request.form['c_reservaciones']
+    nombres = request.form['nombres'].strip()
+    apellidos = request.form['apellidos'].strip()
+    DUI = request.form['DUI'].strip()
+    telefono = request.form['telefono'].strip()
+    p_pendiente = request.form['p_pendiente'].strip()
+    c_reservaciones = request.form['c_reservaciones'].strip()
+    
+    # Verifica si alguna de las variables después de aplicar strip() está vacía
+    if not all([nombres, apellidos,DUI, telefono, p_pendiente, c_reservaciones]):
+        return redirect(url_for('valclientwhite'))
     
     if nombres and apellidos and DUI and telefono and p_pendiente and c_reservaciones :
         cursor = db.database.cursor()

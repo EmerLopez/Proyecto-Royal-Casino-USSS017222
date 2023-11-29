@@ -34,7 +34,7 @@
 <script>
     function confirmDelete(id) {
         if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
-            window.location.href = "/deletelocal/" + id;
+            window.location.href = "/delete/" + id;
         }
     }
     function search() {
@@ -59,7 +59,12 @@
 </script>
 
   <h1 class="text-center mt-5 mb-5 text">Alquiler Sillas|Mesas|Manteles</h1>  
-
+  <div class="container">
+    {% if mensaje_error %}
+    <div class="alert alert-danger">
+        {{ mensaje_error }}
+    </div>
+    {% endif %} 
   <div class="container">
     <div class="card shadow">
         <div class="card-body">
@@ -128,9 +133,10 @@
                 <div class="col-3">
                     <label class="text">Pago</label>
                     <select class="form-select mb-3" name="pago" required>
-                        
+                        <option value=""></option>
                         <option value="pendiente">Pendiente</option>
                         <option value="pagado">Pagado</option>
+                        <option value="Inventario devuelto">Inventario devuelto</option>
                     </select>
                 </div>
                 <div class="col">
@@ -265,12 +271,13 @@
         </table>
     </div>
   </div>
-  <div class="bfinal">
+  
+
+</body>
+<div class="bfinal">
     <p>&nbsp;</p>
     <p class="fs-2 fw-bold text-center ">2023</p>
     
    </div>  
-
-</body>
 </html>
 

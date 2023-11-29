@@ -1,0 +1,28 @@
+
+
+<!---Alerta que se dispara sin JavaScript-->
+{% if (tipo==1) %}
+<div id='alert' class="mi_alerta toast active">
+    <div class="toast-content">
+        <i class="bi bi-check check"></i>
+        <div class="message">
+            <span class="text text-1">Genial..!</span>
+            <span class="text text-2">{{ msg }}</span>
+        </div>
+    </div>
+    <i class="bi bi-x-lg close"></i>
+    <div class="progress active"></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Selecciona la alerta y añade la clase active
+        var alertaSinJS = document.querySelector('.mi_alerta.toast.active');
+
+        // Función para quitar la clase active después de 5 segundos
+        setTimeout(function () {
+            alertaSinJS.classList.remove('active');
+        }, 4000);
+    });
+</script>
+
+{% endif %}

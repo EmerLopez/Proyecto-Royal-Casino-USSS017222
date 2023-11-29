@@ -30,6 +30,8 @@
     setTimeout(hideMessage, 2000); // Ocultar después de 5 segundos (5000 ms)
 </script>
 
+
+
 <script>
     function confirmDelete(id) {
         if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
@@ -66,13 +68,21 @@
   <h1 class="text-center mt-5 mb-5 text">Reservaciones de Establecimiento</h1>  
 
   <div class="container">
+    {% if mensaje_error %}
+    <div class="alert alert-danger">
+        {{ mensaje_error }}
+    </div>
+    {% endif %} 
     <div class="card shadow">
         <div class="card-body">
             <div data-bs-theme="dark" class="d-flex">
+             
                 <div>Reservaciones Establecimiento</div>
             </div>
         </div>
+      
         <form action="/userlocal" method="POST" validateForm()>
+           
             <div class="row mb-3">
                 <div class="col-3 form-floating">
                     <input type="text" class="form-control" id="floatingInput" placeholder="nombre"  name="nombres" required>
@@ -211,6 +221,7 @@
                                         <select class="form-select mb-3" name="pago">
                                             <option value="Pagado">Pagado</option>
                                             <option value="Pendiente">Pendiente</option>
+                                            
                                         </select>
                                     </div>
                                   

@@ -36,7 +36,7 @@
 <script>
     function confirmDelete(id) {
         if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
-            window.location.href = "/deletelocal/" + id;
+            window.location.href = "/deleteclient/" + id;
         }
     }
     function search() {
@@ -64,6 +64,11 @@
   <h1 class="text-center mt-5 mb-5 text">Gestiones de Clientes</h1>  
 
   <div class="container">
+    {% if mensaje_error %}
+    <div class="alert alert-danger">
+        {{ mensaje_error }}
+    </div>
+    {% endif %} 
     <div class="card shadow">
         <div class="card-body">
             <div data-bs-theme="dark" class="d-flex">
