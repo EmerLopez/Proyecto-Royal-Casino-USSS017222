@@ -53,9 +53,9 @@ def show_messageclientwhite(mensaje_error):
     text = 0
     return render_template('clientes.html', data=insertObject, mensaje_error=mensaje_error)
 
-#Cargar Clientes
-@app.route('/show_messageclient/<message>')
-def show_messageclient(message):
+#Cargar Alerta Clientes
+@app.route('/show_messageclient/<msg>')
+def show_messageclient(msg):
   
     cursor = db.database.cursor()
     cursor.execute("SELECT * FROM clientes")
@@ -66,25 +66,25 @@ def show_messageclient(message):
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
     text = 0
-    return render_template('clientes.html', data=insertObject, message=message)
+    return render_template('clientes.html', data=insertObject, msg=msg, tipo=1)
    
 #Mensaje agregar cliente:
 @app.route('/valclient',methods=['GET'])
 def valclient():
-    message = "Cliente Ingresado con Exito!"
-    return redirect(url_for('show_messageclient', message=message))
+    msg = "Cliente Ingresado con Exito!"
+    return redirect(url_for('show_messageclient', msg=msg))
 
 #Editar cliente:
 @app.route('/msgclientedit',methods=['GET'])
 def msgclientedit():
-    message = "Cliente Editado con Exito!"
-    return redirect(url_for('show_messageclient', message=message))
+    msg = "Cliente Editado con Exito!"
+    return redirect(url_for('show_messageclient',msg=msg))
 
 #Eliminar cliente:
 @app.route('/msgclientdelete',methods=['GET'])
 def msgclientdelete():
-    message = "Cliente Eliminado con Exito!"
-    return redirect(url_for('show_messageclient', message=message))
+    msg = "Cliente Eliminado con Exito!"
+    return redirect(url_for('show_messageclient', msg=msg))
 
 #Validacion campos en blanco:
 @app.route('/valclientwhite',methods=['GET'])
@@ -107,11 +107,11 @@ def show_messageadminwhite(mensaje_error):
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
     text = 0
-    return render_template('admin.html', data=insertObject, mensaje_error=mensaje_error, msg='No existe el Carro', tipo=1)
+    return render_template('admin.html', data=insertObject, mensaje_error=mensaje_error)
  
  #Cargar Administradores:
-@app.route('/show_messageadmin/<message>')
-def show_messageadmin(message):
+@app.route('/show_messageadmin/<msg>')
+def show_messageadmin(msg):
   
     cursor = db.database.cursor()
     cursor.execute("SELECT * FROM administrador")
@@ -122,25 +122,25 @@ def show_messageadmin(message):
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
     text = 0
-    return render_template('admin.html', data=insertObject, message=message)
+    return render_template('admin.html', data=insertObject, msg=msg, tipo=1)
 
 #Agregar Administrador:
 @app.route('/msgadminadd',methods=['GET'])
 def msgadminadd():
-    message = "Administrador Ingresado con Exito!"
-    return redirect(url_for('show_messageadmin', message=message))
+    msg = "Administrador Ingresado con Exito!"
+    return redirect(url_for('show_messageadmin', msg=msg))
 
 #Editar Administrador:
 @app.route('/msgadminedit',methods=['GET'])
 def msgadminedit():
-    message = "Administrador Editado con Exito!"
-    return redirect(url_for('show_messageadmin', message=message))
+    msg = "Administrador Editado con Exito!"
+    return redirect(url_for('show_messageadmin', msg=msg))
 
 #Eliminar Administrador:
 @app.route('/msgadmindelete',methods=['GET'])
 def msgadmindelete():
-    message = "Administrador Eliminado con Exito!"
-    return redirect(url_for('show_messageadmin', message=message))
+    msg = "Administrador Eliminado con Exito!"
+    return redirect(url_for('show_messageadmin', msg=msg))
 
 #Validar Campo en blanco:
 @app.route('/whiteadmindelete',methods=['GET'])
@@ -164,8 +164,8 @@ def show_messagelocale(mensaje_error):
     return render_template('r_local.html', data=insertObject, mensaje_error=mensaje_error)
  
  #Carga r_local:
-@app.route('/show_messagelocal/<message>')
-def show_messagelocal(message):
+@app.route('/show_messagelocal/<msg>')
+def show_messagelocal(msg):
     cursor = db.database.cursor()
     cursor.execute("SELECT * FROM r_local")
     myresult = cursor.fetchall()
@@ -174,25 +174,25 @@ def show_messagelocal(message):
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
-    return render_template('r_local.html', data=insertObject, message=message)
+    return render_template('r_local.html', data=insertObject, msg=msg, tipo=1)
 
 #Agregar r_local:
 @app.route('/msglocaladd',methods=['GET'])
 def msglocaladd():
-    message = "Reservacion Ingresada con Exito!"
-    return redirect(url_for('show_messagelocal', message=message))
+    msg = "Reservacion Ingresada con Exito!"
+    return redirect(url_for('show_messagelocal', msg=msg))
 
 #Editar r_local:
 @app.route('/msglocaledit',methods=['GET'])
 def msglocaledit():
-    message = "Reservacion Editada con Exito!"
-    return redirect(url_for('show_messagelocal', message=message))
+    msg = "Reservacion Editada con Exito!"
+    return redirect(url_for('show_messagelocal', msg=msg))
 
 #Eliminar r_local:
 @app.route('/msglocaldelete',methods=['GET'])
 def msglocaldelete():
-    message = "Reservacion Eliminada con Exito!"
-    return redirect(url_for('show_messagelocal', message=message))
+    msg = "Reservacion Eliminada con Exito!"
+    return redirect(url_for('show_messagelocal', msg=msg))
 
 #Validacion de fecha r_local:
 @app.route('/vallocaladd',methods=['GET'])
@@ -223,8 +223,8 @@ def show_messagermmsv(mensaje_error):
     return render_template('rmms.html', data=insertObject,mensaje_error=mensaje_error)
  
  #Carga rmms:
-@app.route('/show_messagermms/<message>')
-def show_messagermms(message):
+@app.route('/show_messagermms/<msg>')
+def show_messagermms(msg):
     cursor = db.database.cursor()
     cursor.execute("SELECT * FROM rmms")
     myresult = cursor.fetchall()
@@ -233,25 +233,25 @@ def show_messagermms(message):
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
     cursor.close()
-    return render_template('rmms.html', data=insertObject, message=message)
+    return render_template('rmms.html', data=insertObject, msg=msg, tipo=1)
 
 #Agregar rmms:
 @app.route('/msgrmmsadd',methods=['GET'])
 def msgrmmsadd():
-    message = "Reservacion Ingresada con Exito!"
-    return redirect(url_for('show_messagermms', message=message))
+    msg = "Reservacion Ingresada con Exito!"
+    return redirect(url_for('show_messagermms', msg=msg))
 
 #Editar rmms:
 @app.route('/msgrmmsedit',methods=['GET'])
 def msgrmmsedit():
-    message = "Reservacion Editada con Exito!"
-    return redirect(url_for('show_messagermms', message=message))
+    msg = "Reservacion Editada con Exito!"
+    return redirect(url_for('show_messagermms', msg=msg))
 
 #Eliminar rmms:
 @app.route('/msgrmmsdelete',methods=['GET'])
 def msgrmmsdelete():
-    message = "Reservacion Eliminada con Exito!"
-    return redirect(url_for('show_messagermms', message=message))
+    msg = "Reservacion Eliminada con Exito!"
+    return redirect(url_for('show_messagermms', msg=msg))
 
 #Val fecha rmms:
 @app.route('/valrmmsadd',methods=['GET'])

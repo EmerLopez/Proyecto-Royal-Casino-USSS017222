@@ -48,16 +48,7 @@
   height: 140px;
   
 }      
-.floating-message {
-          
-          position: fixed;
-          top: 70px;
-          right: 50px;
-          background-color: #04df3b;
-          color: #fff;
-          padding: 20px;
-          border-radius: 20px;
-      }
+
 .text-primary { color: #e8b542; } 
 .text-center { text-align: center; }
 .mb-5 { margin-bottom: 5rem; }

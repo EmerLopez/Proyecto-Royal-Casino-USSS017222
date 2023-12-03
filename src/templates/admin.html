@@ -18,28 +18,11 @@
     
 </head>
 <body>
-  
 
- <!-- Mensajes flotantes -->
- <div class="floating-message" id="floating-message" style="{% if message %}display: block;{% else %}display: none;{% endif %}">
-    {% if message %}
-        <span id="message-text">{{ message }}</span>
-    {% endif %}
-</div>
-
-<script>
-    function hideMessage() {
-        var message = document.getElementById("floating-message");
-        message.style.display = "none";
-    }
-
-    // Mostrar el mensaje
-    setTimeout(hideMessage, 2000); // Ocultar después de 2 segundos (2000 ms)
-</script>
 
 <script>
     function confirmDelete(id) {
-        if (confirm("¿Estás seguro de que quieres eliminar esta reservacion?")) {
+        if (confirm("¿Estás seguro de que quieres eliminar este administrador?")) {
             window.location.href = "/deleteadmin/" + id;
         }
     }
