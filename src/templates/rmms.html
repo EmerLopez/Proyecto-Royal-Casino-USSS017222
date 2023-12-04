@@ -44,6 +44,76 @@
         }
 </script>
 
+<script>
+    function calcularTotal() {
+        // Obtener valores de los campos de entrada
+        var c_mesas = parseFloat(document.getElementById('c_mesas').value) || 0;
+        var c_sillas = parseFloat(document.getElementById('c_sillas').value) || 0;
+        var c_manteles = parseFloat(document.getElementById('c_manteles').value) || 0;
+
+        // Calcular la suma
+        var total = c_mesas*2 + c_sillas*0.50 + c_manteles;
+
+        // Agregar el signo "$" al valor total
+        var totalConSigno = total.toFixed(2);
+
+        // Actualizar el campo de entrada "total" con el valor total y el signo "$"
+        document.getElementById('total').value = totalConSigno;
+    }
+</script>
+
+<script>
+   
+
+    // Función para calcular el total en el formulario de edición
+    function calcularTotalEditar(id) {
+        // Obtener valores de los campos de entrada en el formulario de edición específico
+        var c_mesas = parseFloat(document.getElementById('c_mesasEditar' + id).value) || 0;
+        var c_sillas = parseFloat(document.getElementById('c_sillasEditar' + id).value) || 0;
+        var c_manteles = parseFloat(document.getElementById('c_mantelesEditar' + id).value) || 0;
+
+        // Calcular la suma
+        var total = c_mesas * 2 + c_sillas * 0.50 + c_manteles;
+
+        // Agregar el signo "$" al valor total
+        var totalConSigno = total.toFixed(2);
+
+        // Actualizar el campo de entrada "total" con el valor total y el signo "$"
+        document.getElementById('totalEditar' + id).value = totalConSigno;
+    }
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var pagoo = "{{pago}}"; // Suponiendo que t_reservacion está disponible en el contexto
+
+        var selectElement = document.getElementById('pago');
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === pagoo) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var valor_t_reservacion = "{{t_reservacion}}"; // Suponiendo que t_reservacion está disponible en el contexto
+
+        var selectElement = document.getElementById('t_reservacion');
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === valor_t_reservacion) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+    });
+</script>
+
   <h1 class="text-center mt-5 mb-5 text">Alquiler Sillas|Mesas|Manteles</h1>  
   <div class="container">
     {% if mensaje_error %}
@@ -65,7 +135,7 @@
             <div class="row mb-3">
                 <div class="col-3">
                     <label class="text">TipoReservacion</label>
-                    <select class="form-select mb-3" name="t_reservacion" required>
+                    <select class="form-select mb-3" name="t_reservacion" value="{{t_reservacion}}" id="t_reservacion" required>
                         <option value=""></option>
                         <option value="En Local">En Local</option>
                         <option value="Fuera de Local">Fuera de Local</option>
@@ -73,52 +143,52 @@
                 </div>
                 <div class="col-3">
                     <label class="text">Nombre</label> 
-                    <input type="text" class="form-control mb-3" name="nombres" required>
+                    <input type="text" class="form-control mb-3" name="nombres" value="{{nombres}}" required>
                 </div>
                 <div class="col-3">
                     <label class="text">Apellido</label> 
-                    <input type="text" class="form-control mb-3" name="apellidos" required>
+                    <input type="text" class="form-control mb-3" name="apellidos" value="{{apellidos}}" required>
                 </div>
                 <div class="col-3">
                     <label class="text">DUI</label> 
-                    <input type="text" class="form-control mb-3" name="DUI" required>
+                    <input type="text" class="form-control mb-3" name="DUI" value="{{DUI}}" required>
                 </div>
                 <div class="col-3">
                     <label class="text">Telefono</label> 
-                    <input type="text" class="form-control mb-3" name="telefono" required>
+                    <input type="text" class="form-control mb-3" name="telefono"  value="{{telefono}}" required>
                    
                 </div>
                 
                 <div class="col-3">
                     <label class="text">Fecha</label> 
-                    <input type="date" class="form-control mb-3" name="fecha" required>
+                    <input type="date" class="form-control mb-3" name="fecha"  value="{{fecha}}" required>
                    
                 </div>
 
                 <div class="col-3">
                     <label class="text">Cantidad Mesas</label> 
-                    <input type="text" class="form-control mb-3" name="c_mesas" required>
+                    <input type="text" class="form-control mb-3" name="c_mesas" id="c_mesas" value="{{c_mesas}}" required oninput="calcularTotal()">
                    
                 </div>
 
                 <div class="col-3">
                     <label class="text">Cantidad Sillas</label> 
-                    <input type="text" class="form-control mb-3" name="c_sillas" required>
+                    <input type="text" class="form-control mb-3" name="c_sillas" value="{{c_sillas}}" id="c_sillas" required oninput="calcularTotal()">
                    
                 </div>
                 <div class="col-3">
                     <label class="text">Cantidad Manteles</label> 
-                    <input type="text" class="form-control mb-3" name="c_manteles" required>
+                    <input type="text" class="form-control mb-3" name="c_manteles" value="{{c_manteles}}" id="c_manteles" required oninput="calcularTotal()">
                    
                 </div>
                 <div class="col-3">
                     <label class="text">Total</label> 
-                    <input type="text" class="form-control mb-3" name="total" required>
+                    <input type="text" class="form-control mb-3" name="total" value="{{total}}" id="total" required>
                    
                 </div>
                 <div class="col-3">
                     <label class="text">Pago</label>
-                    <select class="form-select mb-3" name="pago" required>
+                    <select class="form-select mb-3" name="pago" value="{{pago}}" id="pago"  required>
                         <option value=""></option>
                         <option value="pendiente">Pendiente</option>
                         <option value="pagado">Pagado</option>
@@ -183,7 +253,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="/edit/{{d.id}}" method="post">
+                                <form action="/edit/{{d.id}}" method="post" id="formEditar{{d.id}}">
                                     <div class="col-3">
                                         <label class="text">TipoReservacion</label>
                                         <select class="form-select mb-3" name="t_reservacion" value="{{d.t_reservacion}}">
@@ -215,29 +285,30 @@
                     
                                     <div class="col-3">
                                         <label class="text">Cantidad Mesas</label> 
-                                        <input type="text" class="form-control mb-3" name="c_mesas" value="{{d.c_mesas}}">
+                                        <input type="text" class="form-control mb-3" name="c_mesas" id="c_mesasEditar{{d.id}}" value="{{d.c_mesas}}" required oninput="calcularTotalEditar('{{d.id}}')">
                                        
                                     </div>
                     
                                     <div class="col-3">
                                         <label class="text">Cantidad Sillas</label> 
-                                        <input type="text" class="form-control mb-3" name="c_sillas" value="{{d.c_sillas}}">
+                                        <input type="text" class="form-control mb-3" name="c_sillas" id="c_sillasEditar{{d.id}}" value="{{d.c_sillas}}" required oninput="calcularTotalEditar('{{d.id}}')">
                                        
                                     </div>
                                     <div class="col-3">
                                         <label class="text">Cantidad Manteles</label> 
-                                        <input type="text" class="form-control mb-3" name="c_manteles" value="{{d.c_manteles}}">
+                                        <input type="text" class="form-control mb-3" name="c_manteles" id="c_mantelesEditar{{d.id}}" value="{{d.c_manteles}}" required oninput="calcularTotalEditar('{{d.id}}')">
+
                                        
                                     </div>
                                     <div class="col-3">
                                         <label class="text">Total</label> 
-                                        <input type="text" class="form-control mb-3" name="total" value="{{d.total}}">
+                                        <input type="text" class="form-control mb-3" name="total" id="totalEditar{{d.id}}" value="{{d.total}}" required>
                                        
                                     </div>
                                     <div class="col-3">
                                         <label class="text">Pago</label>
-                                        <select class="form-select mb-3" name="pago" value="{{d.pago}}">
-                                            <option value="pendiente"></option>
+                                        <select class="form-select mb-3" name="pago" id="totalEditar" value="{{d.total}}" required>
+
                                             <option value="pendiente">Pendiente</option>
                                             <option value="pagado">Pagado</option>
                                         </select>
@@ -247,7 +318,7 @@
                                   
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                <button type="submit" class="btn btn-primary" >Guardar Cambios</button>
                             </div>
                         </form>
                     </div>

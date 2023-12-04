@@ -68,12 +68,12 @@
                 <div class="row mb-3">
                     <div class="col-3">
                     <div class="col-9 form-floating">
-                          <input type="text" class="form-control mb-3" d="floatingInput" placeholder="correo" name="correo" required>
-                          <label for="floatingInput">Correo</label>
+                          <input type="text" class="form-control mb-3" d="floatingInput" placeholder="correo" name="correo" value="{{correo}}" required>
+                          <label for="floatingInput">Usuario</label>
 
                         </div>
                         <div class="col-9 form-floating">
-                        <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Password" name="password" required>
+                        <input type="text" class="form-control mb-3" id="floatingInput" placeholder="Password" name="password" value="{{password}}"required>
                         <label for="floatingInput">Contraseña</label>
                         </div>
                     <div class="col">
@@ -91,18 +91,33 @@
             <table id="dataTable" class="table table-bordered table-gris"> <!-- Agregar la clase table-gris a la tabla -->
                 <thead>
                     <th scope="col" class="text">#</th>
-                    <th scope="col" class="text">Correo</th>
+                    <th scope="col" class="text">Usuario</th>
                     <th scope="col" class="text">Contraseña</th>
                     <th scope="col" class="text">Editar</th>
                     <th scope="col" class="text">Eliminar</th>
                 </thead>
+
+               
             
             <tbody>
+                <script>
+                    // Añade este script para encriptar y mostrar asteriscos en lugar de la contraseña real
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var encryptedPasswords = document.querySelectorAll(".encryptedPassword");
+                
+                        encryptedPasswords.forEach(function(element) {
+                            var password = element.getAttribute("data-password");
+                            var encryptedPassword = password.replace(/./g, '*');
+                            element.innerText = encryptedPassword;
+                        });
+                    });
+                </script>
+                
                 {% for d in data %}
                 <tr>
                     <td>{{d.id}}</td>
                     <td>{{d.correo}}</td>
-                    <td>{{d.password}}</td>
+                    <td><span class="encryptedPassword" data-password="{{d.password}}"></span></td>
                     <td><button class="btn btn-primary btn-sm" id="btn-edit{{d.id}}" data-bs-toggle="modal" data-bs-target="#modal{{d.id}}">Editar</button></td>
                     <td><button class="btn btn-danger btn-sm" onclick="confirmDelete('{{d.id}}')">Eliminar</button></td>
                </tr>
@@ -116,7 +131,7 @@
                         </div>
                         <div class="modal-body">
                             <form action="/editadmin/{{d.id}}" method="post">
-                                <label class="text">Correo</label>
+                                <label class="text">Usuario</label>
                                 <input type="text" class="form-control mb-3" name="correo" value="{{d.correo}}">
                                 <label class="text">Contraseña</label>
                                 <input type="text" class="form-control mb-3" name="password" value="{{d.password}}">

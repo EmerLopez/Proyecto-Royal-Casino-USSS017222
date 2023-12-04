@@ -69,23 +69,23 @@
            
             <div class="row mb-3">
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control" id="floatingInput" placeholder="nombre"  name="nombres" required>
+                    <input type="text" class="form-control" id="floatingInput" placeholder="nombre"  name="nombres" value="{{nombres}}" required>
                     <label for="floatingInput">Nombres</label>
                 </div>
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control" id="floatingInput" placeholder="apellido" name="apellidos" required>
+                    <input type="text" class="form-control" id="floatingInput" placeholder="apellido" name="apellidos"  value="{{apellidos}}" required>
                     <label for="floatingInput">Apellidos</label> 
                 </div>
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control" id="floatingInput" placeholder="DUI" name="DUI" required>
+                    <input type="text" class="form-control" id="floatingInput" placeholder="DUI" name="DUI" value="{{DUI}}" required>
                     <label for="floatingInput">DUI</label> 
                 </div>
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control mb-3" id="floatingInput" placeholder="telefono" name="telefono" required>
+                    <input type="text" class="form-control mb-3" id="floatingInput" placeholder="telefono" name="telefono" value="{{telefono}}" required>
                     <label for="floatingInput">Telefono</label> 
                 </div>
                 <div class="col-3 form-floating">
-                    <select class="form-select mb-3" name="t_reservacion" required>
+                    <select class="form-select mb-3" name="t_reservacion" value="{{t_reservacion}}" required>
                         <option value="Local"></option>
                         <option value="Local">Local</option>
                         <option value="Extras">Extras</option>
@@ -94,17 +94,17 @@
                 </div>
                 
                 <div class="col-3 form-floating">
-                    <input type="date" class="form-control" id="floatingInput" placeholder="fecha" name="fecha" required>
+                    <input type="date" class="form-control" id="floatingInput" placeholder="fecha" name="fecha" value="{{fecha}}" required>
                     <label for="floatingInput">Fecha a Rentar</label> 
                 </div>
 
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control mb-3" id="floatingInput" placeholder="total" name="total" required>
+                    <input type="text" class="form-control mb-3" id="floatingInput" placeholder="total" name="total" value="{{total}}" required>
                     <label for="floatingInput">Total</label> 
                 </div>
 
                 <div class="col-3 form-floating">
-                    <select class="form-select mb-3" name="pago" required>
+                    <select class="form-select mb-3" name="pago" value="{{pago}}" required>
                         <option value="Local"></option>
                         <option value="Pagado">Pagado</option>
                         <option value="Pendiente">Pendiente</option>
