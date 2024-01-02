@@ -43,6 +43,19 @@
             }
         }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var pagoo = "{{p_pendiente}}"; // Suponiendo que t_reservacion está disponible en el contexto
+
+        var selectElement = document.getElementById('p_pendiente');
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === pagoo) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+    });
+</script>
 
 </script>
   <h1 class="text-center mt-5 mb-5 text">Gestiones de Clientes</h1>  
@@ -84,7 +97,7 @@
                 </div>
                 <div class="col-3">
                     <label class="text">P_Pendiente</label>
-                    <select class="form-select mb-3" name="p_pendiente" value="{{p_pendiente}}" required>                        <option value=""></option>
+                    <select class="form-select mb-3" name="p_pendiente" value="{{p_pendiente}}" id="p_pendiente" required>                        <option value=""></option>
                         <option value="pendiente">Pendiente</option>
                         <option value="pagado">Pagado</option>
                     </select>
@@ -162,8 +175,8 @@
                                     </div>
                                     <div class="col-3">
                                         <label class="text">P_Pendiente</label>
-                                        <select class="form-select mb-3" name="p_pendiente">
-                                            
+                                        <select class="form-select mb-3" name="p_pendiente"  value="{{d.p_pendiente}}">
+                                            <option value=""></option>
                                             <option value="pendiente">Pendiente</option>
                                             <option value="pagado">Pagado</option>
                                         </select>
@@ -200,4 +213,3 @@
 
 </body>
 </html>
-

@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 
 
 
+
 template_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 template_dir = os.path.join(template_dir, 'src', 'templates')
 
@@ -32,6 +33,31 @@ def index():
     #return render_template('index.html', message=message)
  return render_template('index.html') 
 
+def modificar_inventario(nombre_articulo, cantidad, devolver=False):
+    try:
+        cursor = db.database.cursor()
+
+        # Obtener la cantidad actual del artículo en el inventario
+        cursor.execute("SELECT cantidad FROM inventario WHERE nombre = %s", (nombre_articulo,))
+        current_quantity = cursor.fetchone()[0]
+
+        # Realizar la operación de suma o resta
+        if devolver:
+            new_quantity = current_quantity + cantidad
+        else:
+            new_quantity = current_quantity - cantidad
+
+        # Actualizar la cantidad en el inventario
+        cursor.execute("UPDATE inventario SET cantidad = %s WHERE nombre = %s", (new_quantity, nombre_articulo))
+        db.database.commit()
+
+        cursor.close()
+
+        return True, f"Inventario actualizado para {nombre_articulo}: Cantidad actual: {new_quantity}"
+    except Exception as e:
+        return False, f"Error al actualizar el inventario para {nombre_articulo}: {str(e)}"
+
+
 #---------------------------------------------------------------------------
 #funciones rmms
 
@@ -56,13 +82,22 @@ def rmms():
     
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+    
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))     
 
     cursor.close()
-    return render_template('rmms.html', data=insertObject, search_term=search_term)
+    return render_template('rmms.html', data=insertObject, search_term=search_term,data2 = insertObject_otra_tabla)
 
 @app.route('/user', methods=['POST'])
 def addUser():
-    t_reservacion = request.form['t_reservacion'].strip()
+    
     nombres = request.form['nombres'].strip()
     apellidos = request.form['apellidos'].strip()
     DUI = request.form['DUI'].strip()
@@ -74,6 +109,7 @@ def addUser():
     total = request.form['total'].strip()
     pago = request.form['pago'].strip()
     p_pendiente = request.form['pago'].strip()
+    
     
     cursor = db.database.cursor()
     Cnombre = nombres
@@ -90,13 +126,13 @@ def addUser():
     if_true = False
 
     # Verifica si alguna de las variables después de aplicar strip() está vacía
-    if not all([t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago]):
+    if not all([nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago]):
         if_true = True
         mensaje_error = "Error: Campo en blanco, llena todos los campos"
         search_term = request.args.get('search', '')
         data = datos_rmms(search_term)
         return render_template('rmms.html', mensaje_error=mensaje_error, 
-                               t_reservacion=t_reservacion,
+                               
                                nombres=nombres,
                                apellidos=apellidos,
                                DUI=DUI,
@@ -114,7 +150,7 @@ def addUser():
         search_term = request.args.get('search', '')
         data = datos_rmms(search_term)
         return render_template('rmms.html', mensaje_error=mensaje_error, 
-                               t_reservacion=t_reservacion,
+                               
                                nombres=nombres,
                                apellidos=apellidos,
                                DUI=DUI,
@@ -126,7 +162,43 @@ def addUser():
                                total=total,
                                pago=pago,
                                data=data, search_term=search_term) 
-
+        
+    elif len(DUI) != 9: 
+        mensaje_error = "Error: DUI Invalido!"
+        search_term = request.args.get('search', '')
+        data = datos_rmms(search_term)
+        return render_template('rmms.html', mensaje_error=mensaje_error, 
+                               
+                               nombres=nombres,
+                               apellidos=apellidos,
+                               DUI=DUI,
+                               telefono=telefono,
+                               fecha=fecha, 
+                               c_mesas=c_mesas,
+                               c_sillas=c_sillas,
+                               c_manteles=c_manteles,
+                               total=total,
+                               pago=pago,
+                               data=data, search_term=search_term) 
+        
+    elif len(telefono) < 8:
+        mensaje_error = "Error: Telefono Invalido!"
+        search_term = request.args.get('search', '')
+        data = datos_rmms(search_term)
+        return render_template('rmms.html', mensaje_error=mensaje_error, 
+                               
+                               nombres=nombres,
+                               apellidos=apellidos,
+                               DUI=DUI,
+                               telefono=telefono,
+                               fecha=fecha, 
+                               c_mesas=c_mesas,
+                               c_sillas=c_sillas,
+                               c_manteles=c_manteles,
+                               total=total,
+                               pago=pago,
+                               data=data, search_term=search_term)     
+    
     else:
         if result:
             if_true = True
@@ -136,7 +208,7 @@ def addUser():
             cursor.execute(update_query, (Ncantidad, NID,))
             db.database.commit()
             
-        elif t_reservacion and nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
+        elif nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
             if_true = True
             cursor = db.database.cursor()
             sql = "INSERT INTO clientes (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones) VALUES (%s, %s, %s, %s, %s, 1)"
@@ -145,10 +217,14 @@ def addUser():
             db.database.commit()
             
         cursor = db.database.cursor()
-        sql = "INSERT INTO rmms (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago)
+        sql = "INSERT INTO rmms (nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        data = (nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago)
         cursor.execute(sql, data)
         db.database.commit()
+        
+        modificar_inventario('mesas', int(c_mesas))
+        modificar_inventario('sillas', int(c_sillas))
+        modificar_inventario('manteles', int(c_manteles))
     
         if  if_true == True:
             return redirect(url_for('msgrmmsadd'))
@@ -157,7 +233,7 @@ def addUser():
             search_term = request.args.get('search', '')
             data = datos_rmms(search_term)
             return render_template('rmms.html', mensaje_error=mensaje_error, 
-                               t_reservacion=t_reservacion,
+                               
                                nombres=nombres,
                                apellidos=apellidos,
                                DUI=DUI,
@@ -174,7 +250,7 @@ def addUser():
 @app.route('/delete/<string:id>')
 def delete(id):
     cursor = db.database.cursor()
-    select_query = "SELECT nombres FROM rmms WHERE id = %s"
+    select_query = "SELECT DUI FROM rmms WHERE id = %s"
     cursor.execute(select_query, (id,))
     result = cursor.fetchone()
   
@@ -202,7 +278,7 @@ def delete(id):
 
 @app.route('/edit/<string:id>', methods=['POST'])
 def edit(id):
-    t_reservacion = request.form['t_reservacion'].strip()
+    
     nombres = request.form['nombres'].strip()
     apellidos = request.form['apellidos'].strip()
     DUI = request.form['DUI'].strip()
@@ -214,20 +290,24 @@ def edit(id):
     total = request.form['total'].strip()
     pago = request.form['pago'].strip()
     
-    if not all([t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago]):
+    if not all([nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago]):
         mensaje_error = "Error: Campo en blanco, llena todos los campos"
         search_term = request.args.get('search', '')
         data = datos_rmms(search_term)
         return render_template('rmms.html', mensaje_error=mensaje_error, 
                                data=data, search_term=search_term)
         
-    if t_reservacion and nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
+                          
+        
+    if nombres and apellidos and DUI and telefono and fecha and c_mesas and c_sillas and c_manteles and total and pago:
         cursor = db.database.cursor()
-        sql = "UPDATE rmms SET t_reservacion=%s, nombres=%s, apellidos=%s, Dui=%s, telefono=%s, fecha=%s, c_mesas=%s, c_sillas=%s, c_manteles=%s, total=%s, pago=%s WHERE id=%s"
+        sql = "UPDATE rmms SET nombres=%s, apellidos=%s, Dui=%s, telefono=%s, fecha=%s, c_mesas=%s, c_sillas=%s, c_manteles=%s, total=%s, pago=%s WHERE id=%s"
 
-        data = (t_reservacion, nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago,id)
+        data = (nombres, apellidos, DUI, telefono, fecha, c_mesas, c_sillas, c_manteles, total, pago,id)
         cursor.execute(sql, data)
         db.database.commit()
+        
+        
         return redirect(url_for('msgrmmsedit'))
     else:
         mensaje_error = "Error al Editar, Intentelo de nuevo"
@@ -262,20 +342,47 @@ def datos_rmms(search_term=''):
 @app.route('/msgrmmsadd',methods=['GET'])
 def msgrmmsadd():
     data = datos_rmms()
-    return render_template('rmms.html', data=data, msg = "Reservacion Ingresada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    return render_template('rmms.html', data=data, msg = "Reservacion Ingresada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
 
 #Editar rmms:
 @app.route('/msgrmmsedit',methods=['GET'])
 def msgrmmsedit():
     data = datos_rmms()
-    return render_template('rmms.html', data=data,msg = "Reservacion Editada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    return render_template('rmms.html', data=data,msg = "Reservacion Editada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
 
 #Eliminar rmms:
 @app.route('/msgrmmsdelete',methods=['GET'])
 def msgrmmsdelete():
     data = datos_rmms()
-    msg = "Reservacion Eliminada con Exito!"
-    return render_template('rmms.html', data=data,msg = "Reservacion Eliminada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    
+    return render_template('rmms.html', data=data,msg = "Reservacion Eliminada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
 
 #--------------------------------------------------------------------
 #r_local
@@ -300,9 +407,18 @@ def local():
     
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+    
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))    
 
     cursor.close()
-    return render_template('r_local.html', data=insertObject, search_term=search_term)
+    return render_template('r_local.html', data=insertObject, search_term=search_term,data2 = insertObject_otra_tabla)
 
 @app.route('/userlocal', methods=['POST'])
 def addUserlocal():
@@ -311,6 +427,9 @@ def addUserlocal():
     DUI = request.form['DUI'].strip()
     telefono = request.form['telefono'].strip()
     t_reservacion = request.form['t_reservacion'].strip()
+    c_mesas = request.form['c_mesas'].strip()
+    c_sillas = request.form['c_sillas'].strip()
+    c_manteles = request.form['c_manteles'].strip()
     fecha = request.form['fecha'].strip()
     total = request.form['total'].strip()
     pago = request.form['pago'].strip()
@@ -319,7 +438,7 @@ def addUserlocal():
     #Variable booleana en caso de que todas las condiciones sean falsas:
     if_true = False
     
-    if not all([nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago , p_pendiente]):
+    if not all([nombres, apellidos, DUI, telefono, t_reservacion,c_mesas, c_sillas,c_manteles, fecha, total, pago , p_pendiente]):
         if_true = True
         mensaje_error = "Error: Campo en blanco, llena todos los campos"
         search_term = request.args.get('search', '')
@@ -330,6 +449,9 @@ def addUserlocal():
                                 DUI=DUI,
                                 telefono=telefono,
                                 t_reservacion=t_reservacion,
+                                c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
                                 fecha=fecha,
                                 total=total,
                                 pago=pago,
@@ -337,16 +459,18 @@ def addUserlocal():
                                 data=data, search_term=search_term)  
     
     cursor = db.database.cursor()
-    Cnombre = nombres
-    select_query = "SELECT nombres, c_reservaciones FROM clientes WHERE nombres = %s"
+    Cnombre = DUI
+    select_query = "SELECT DUI, c_reservaciones FROM clientes WHERE DUI = %s"
     cursor.execute(select_query, (Cnombre,))
     result = cursor.fetchone()
-    
+
+   
     consulta = "SELECT * FROM r_local WHERE fecha = %s"
     valores = (fecha,)
     cursor.execute(consulta, valores,)
     resultado = cursor.fetchone()
     
+   
     #R_local
     if resultado:
         if_true = True
@@ -359,32 +483,96 @@ def addUserlocal():
                                 DUI=DUI,
                                 telefono=telefono,
                                 t_reservacion=t_reservacion,
+                                c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
                                 fecha=fecha,
                                 total=total,
                                 pago=pago,
                                 p_pendiente=p_pendiente,
                                 data=data, search_term=search_term) 
+        
+    elif not (DUI.replace('.', '', 1).isdigit() and total.replace('.', '', 1).isdigit() and telefono.replace('.', '', 1).isdigit() and c_mesas.replace('.', '', 1).isdigit() and c_sillas.replace('.', '', 1).isdigit() and c_manteles.replace('.', '', 1).isdigit()):
+        mensaje_error = "Error: Datos Invalidos!"
+        search_term = request.args.get('search', '')
+        data = datos_rmms(search_term)
+        return render_template('r_local.html', mensaje_error=mensaje_error, 
+                               nombres=nombres,
+                                apellidos=apellidos,
+                                DUI=DUI,
+                                telefono=telefono,
+                                t_reservacion=t_reservacion,
+                                c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
+                                fecha=fecha,
+                                total=total,
+                                pago=pago,
+                                p_pendiente=p_pendiente,
+                                data=data, search_term=search_term)  
+    elif len(DUI) != 9:
+        mensaje_error = "Error: DUI Invalido!"
+        search_term = request.args.get('search', '')
+        data = datos_rmms(search_term)
+        return render_template('r_local.html', mensaje_error=mensaje_error, 
+                               nombres=nombres,
+                                apellidos=apellidos,
+                                DUI=DUI,
+                                telefono=telefono,
+                                t_reservacion=t_reservacion,
+                                c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
+                                fecha=fecha,
+                                total=total,
+                                pago=pago,
+                                p_pendiente=p_pendiente,
+                                data=data, search_term=search_term) 
+        
+    elif len(DUI) < 8:
+        mensaje_error = "Error: Telefono Invalido!"
+        search_term = request.args.get('search', '')
+        data = datos_rmms(search_term)
+        return render_template('r_local.html', mensaje_error=mensaje_error, 
+                               nombres=nombres,
+                                apellidos=apellidos,
+                                DUI=DUI,
+                                telefono=telefono,
+                                t_reservacion=t_reservacion,
+                                c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
+                                fecha=fecha,
+                                total=total,
+                                pago=pago,
+                                p_pendiente=p_pendiente,
+                                data=data, search_term=search_term) 
+                      
     
     else:        
         if result:
             if_true = True
             NID, cantidad = result
             Ncantidad = cantidad + 1
-            update_query = "UPDATE clientes SET c_reservaciones = %s WHERE nombres = %s"
+            update_query = "UPDATE clientes SET c_reservaciones = %s WHERE DUI = %s"
             cursor.execute(update_query, (Ncantidad, NID,))
             db.database.commit()
             
-        elif nombres and apellidos and DUI and telefono and t_reservacion and fecha and total and pago and p_pendiente:
+        elif nombres and apellidos and DUI and telefono and t_reservacion and c_mesas and c_sillas and c_manteles and fecha and total and pago and p_pendiente:
             if_true = True 
             cursor = db.database.cursor()
             sql = "INSERT INTO clientes (nombres, apellidos, DUI, telefono, p_pendiente, c_reservaciones) VALUES (%s, %s, %s, %s, %s, 1)"
             data = (nombres, apellidos, DUI, telefono, p_pendiente )
             cursor.execute(sql, data)
             db.database.commit()
+        
+        modificar_inventario('mesas', int(c_mesas))
+        modificar_inventario('sillas', int(c_sillas))
+        modificar_inventario('manteles', int(c_manteles))  
             
         cursor = db.database.cursor()
-        sql = "INSERT INTO r_local (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        data = (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago)
+        sql = "INSERT INTO r_local (nombres, apellidos, DUI, telefono, t_reservacion, c_mesas, c_sillas, c_manteles, fecha, total, pago) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        data = (nombres, apellidos, DUI, telefono, t_reservacion, c_mesas, c_sillas, c_manteles, fecha, total, pago)
         cursor.execute(sql, data)
         db.database.commit() 
         del resultado
@@ -401,6 +589,9 @@ def addUserlocal():
                                 DUI=DUI,
                                 telefono=telefono,
                                 t_reservacion=t_reservacion,
+                                 c_mesas = c_mesas, 
+                                c_sillas = c_sillas,
+                                c_manteles = c_manteles,
                                 fecha=fecha,
                                 total=total,
                                 pago=pago,
@@ -427,6 +618,8 @@ def deletelocal(id):
         delete_query = "DELETE FROM r_local WHERE id=%s"
         cursor.execute(delete_query, (id,))
         db.database.commit()
+        
+        
 
         return redirect(url_for('msglocaldelete'))
     else:
@@ -444,32 +637,13 @@ def editlocal(id):
     DUI = request.form['DUI'].strip()
     telefono = request.form['telefono'].strip()
     t_reservacion = request.form['t_reservacion'].strip()
+    c_mesas = request.form['c_mesas'].strip()
+    c_sillas = request.form['c_sillas'].strip()
+    c_manteles = request.form['c_manteles'].strip()
     fecha = request.form['fecha'].strip()
     total = request.form['total'].strip()
     pago = request.form['pago'].strip()
-    
-    cursor = db.database.cursor()
-    consulta = "SELECT * FROM r_local WHERE fecha = %s"
-    valores = (fecha,)
-    cursor.execute(consulta, valores,)
-    resultado = cursor.fetchone()
-    
-    if resultado:
-       
-        mensaje_error = "Error al Guardar, fecha no disponible!"
-        search_term = request.args.get('search', '')
-        data = datos_rlocal(search_term)
-        return render_template('r_local.html', mensaje_error=mensaje_error, 
-                                nombres=nombres,
-                                apellidos=apellidos,
-                                DUI=DUI,
-                                telefono=telefono,
-                                t_reservacion=t_reservacion,
-                                fecha=fecha,
-                                total=total,
-                                pago=pago,
-                                data=data, search_term=search_term)
-	
+    	
     
     if not all([nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago]):
         mensaje_error = "Error: Campo en blanco, llena todos los campos"
@@ -477,15 +651,22 @@ def editlocal(id):
         data = datos_rlocal(search_term)
         return render_template('r_local.html', mensaje_error=mensaje_error, 
                                 data=data, search_term=search_term)
+        
+             
+        
+    
+    
     
 
-    if nombres and apellidos and DUI and telefono and t_reservacion and fecha and total and pago :
+    if nombres and apellidos and DUI and telefono and t_reservacion and c_mesas and c_sillas and c_manteles and fecha and total and pago :
         cursor = db.database.cursor()
-        sql = "UPDATE r_local SET nombres=%s, apellidos=%s, DUI=%s, telefono=%s, t_reservacion=%s, fecha=%s, total=%s, pago=%s WHERE id=%s"
-        data = (nombres, apellidos, DUI, telefono, t_reservacion, fecha, total, pago, id)
+        
+        sql = "UPDATE r_local SET nombres=%s, apellidos=%s, DUI=%s, telefono=%s, t_reservacion=%s, c_mesas=%s,c_sillas=%s,c_manteles=%s,fecha=%s, total=%s, pago=%s WHERE id=%s"
+        data = (nombres, apellidos, DUI, telefono, t_reservacion,c_mesas,c_sillas,c_manteles, fecha, total, pago, id)
         cursor.execute(sql, data)
         db.database.commit()
         return redirect(url_for('msglocaledit'))
+      
     else:
         mensaje_error = "Error al Editar, Intentelo de nuevo"
         search_term = request.args.get('search', '')
@@ -510,6 +691,15 @@ def datos_rlocal(search_term=''):
 
     for record in myresult:
         insertObject.append(dict(zip(columnNames, record)))
+    
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))    
 
     cursor.close()
     return insertObject    
@@ -520,19 +710,47 @@ def datos_rlocal(search_term=''):
 @app.route('/msglocaladd',methods=['GET'])
 def msglocaladd():
     data = datos_rlocal()
-    return render_template('r_local.html', data=data, msg = "Reservacion Ingresada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    return render_template('r_local.html', data=data, msg = "Reservacion Ingresada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
 
 #Editar r_local:
 @app.route('/msglocaledit',methods=['GET'])
 def msglocaledit():
     data = datos_rlocal()
-    return render_template('r_local.html', data=data, msg = "Reservacion Editada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    return render_template('r_local.html', data=data, msg = "Reservacion Editada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
 
 #Eliminar r_local:
 @app.route('/msglocaldelete',methods=['GET'])
 def msglocaldelete():
     data = datos_rlocal()
-    return render_template('r_local.html', data=data, msg = "Reservacion Eliminada con Exito!", tipo=1)
+    cursor = db.database.cursor()
+    #Inventario    
+    cursor.execute("SELECT * FROM inventario")
+    result_otra_tabla = cursor.fetchall()
+    insertObject_otra_tabla = []
+    columnNames_otra_tabla = [column[0] for column in cursor.description]
+
+    for record in result_otra_tabla:
+        insertObject_otra_tabla.append(dict(zip(columnNames_otra_tabla, record)))
+    return render_template('r_local.html', data=data, msg = "Reservacion Eliminada con Exito!", tipo=1,data2 = insertObject_otra_tabla)
+
 
 #-------------------------------------------------------------------------
 #login
@@ -544,20 +762,30 @@ def login_post():
     correo = request.form['txtCorreo']
     password = request.form['txtPassword']
 
-    # Consulta para verificar las credenciales
-    cursor.execute("SELECT * FROM administrador WHERE correo=%s AND password=%s", (correo, password))
+    # Consulta para verificar las credenciales y obtener el nombre de usuario
+    cursor.execute("SELECT correo FROM administrador WHERE correo=%s AND password=%s", (correo, password))
     result = cursor.fetchone()
 
     if result:
-        session['correo'] = correo
+        session['correo'] = result[0]  # Almacenar el correo electrónico en la sesión si es necesario
+        #session['nombre'] = result[1]  # Almacenar el nombre de usuario en la sesión
         
         return render_template('index.html')
-    elif(correo == ''or password == ''):
-        return render_template('login.html',mensaje="Campos vacios, ingrese sus credenciales")
+    elif correo == '' or password == '':
+        return render_template('login.html', mensaje="Campos vacíos, ingrese sus credenciales")
     else:
-        return render_template('login.html',mensaje="Usuario o Contraseña Incorrecta, Intentelo de nuevo")
-     
-     
+        return render_template('login.html', mensaje="Usuario o Contraseña Incorrecta, inténtelo de nuevo")
+
+
+      
+#--------------------------------------
+@app.route('/logout')
+def logout():
+    # Eliminar la sesión del usuario
+    session.clear()
+    session.pop('correo', None)
+    return redirect('/')
+      
       
 
 
@@ -661,12 +889,7 @@ def editadmin(id):
     correo = request.form['correo'].strip()
     password = request.form['password'].strip()
     
-    cursor = db.database.cursor()
     
-    consulta = "SELECT * FROM administrador WHERE correo = %s"
-    valores = (correo,)
-    cursor.execute(consulta, valores,)
-    resultado = cursor.fetchone()
     
     if not all([correo, password]):
         mensaje_error = "Error: Campo en blanco, llena todos los campos"
@@ -674,19 +897,6 @@ def editadmin(id):
         data = admin(search_term)
         return render_template('admin.html', mensaje_error=mensaje_error, data=data, search_term=search_term)
     
-    if correo == correo:
-        cursor = db.database.cursor()
-        sql = "UPDATE administrador SET  correo=%s, password=%s WHERE id=%s"
-        data = (correo, password, id)
-        cursor.execute(sql, data)
-        db.database.commit()
-        return redirect(url_for('msgadminedit'))
-    
-    if resultado: 
-        mensaje_error = "Error: El Usuario ingresado ya existe"
-        search_term = request.args.get('search', '')
-        data = admin(search_term)
-        return render_template('admin.html', mensaje_error=mensaje_error, data=data, search_term=search_term)
     
     if correo and password:
         cursor = db.database.cursor()
@@ -915,6 +1125,8 @@ def msgclientdelete():
     return render_template('clientes.html', data=data, msg = "Cliente Eliminado con Exito!", tipo=1)
 
 #----------------------------------------------------------------------------------
+
+
 
 
 if __name__ == '__main__':

@@ -43,27 +43,106 @@
         }
 </script>
 
+<script>
+    function calcularTotal() {
+        // Obtener valores de los campos de entrada
+        var c_mesas = parseFloat(document.getElementById('c_mesas').value) || 0;
+        var c_sillas = parseFloat(document.getElementById('c_sillas').value) || 0;
+        var c_manteles = parseFloat(document.getElementById('c_manteles').value) || 0;
+        
+        // Obtener el valor de t_reservacion
+        var t_reservacion = parseFloat(document.getElementById('t_reservacion').options[document.getElementById('t_reservacion').selectedIndex].dataset.precio) || 0;
+
+        // Calcular la suma incluyendo el valor de t_reservacion
+        var total = c_mesas * 2 + c_sillas * 0.50 + c_manteles + t_reservacion;
+
+        // Agregar el signo "$" al valor total
+        var totalConSigno = total.toFixed(2);
+
+        // Actualizar el campo de entrada "total" con el valor total y el signo "$"
+        document.getElementById('total').value = totalConSigno;
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var reservacion = "{{t_reservacion}}"; 
+
+        var selectElement = document.getElementById('t_reservacion');
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === reservacion) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var pagoo = "{{pago}}"; 
+
+        var selectElement = document.getElementById('pago');
+        for (var i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === pagoo) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+    });
+</script>
+
+<script>
+   
+
+    // Función para calcular el total en el formulario de edición
+    function calcularTotalEditar(id) {
+        // Obtener valores de los campos de entrada en el formulario de edición específico
+        var c_mesas = parseFloat(document.getElementById('c_mesasEditar' + id).value) || 0;
+        var c_sillas = parseFloat(document.getElementById('c_sillasEditar' + id).value) || 0;
+        var c_manteles = parseFloat(document.getElementById('c_mantelesEditar' + id).value) || 0;
+        var t_reservacion = parseFloat(document.getElementById('t_reservacion').options[document.getElementById('t_reservacion').selectedIndex].dataset.precio) || 0;
+
+        // Calcular la suma
+        var total = c_mesas * 2 + c_sillas * 0.50 + c_manteles+ t_reservacion;
+
+        // Agregar el signo "$" al valor total
+        var totalConSigno = total.toFixed(2);
+
+        // Actualizar el campo de entrada "total" con el valor total y el signo "$"
+        document.getElementById('totalEditar' + id).value = totalConSigno;
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var fechaInput = document.getElementById('fechaInput');
+        fechaInput.addEventListener('change', function () {
+            var seleccionada = new Date(this.value);
+            var hoy = new Date();
+
+            // Compara las fechas
+            if (seleccionada < hoy) {
+                alert("La fecha no puede ser menor a la fecha actual.");
+                this.value = ''; // Limpiar la fecha seleccionada
+            }
+        });
+    });
+</script>
+
 
 
 <body>
     
    
-
-  <h1 class="text-center mt-5 mb-5 text">Reservaciones de Establecimiento</h1>  
-
-  <div class="container">
-    {% if mensaje_error %}
-    <div class="alert alert-danger">
-        {{ mensaje_error }}
-    </div>
-    {% endif %} 
-    <div class="card shadow">
-        <div class="card-body">
-            <div data-bs-theme="dark" class="d-flex">
-             
-                <div>Reservaciones Establecimiento</div>
-            </div>
+    <h1 class="text-center mt-5 mb-5 text">Reservaciones de Establecimiento</h1>  
+    <div class="container">
+        {% if mensaje_error %}
+        <div class="alert alert-danger">
+            {{ mensaje_error }}
         </div>
+        {% endif %} 
+      <div class="card shadow">
+
       
         <form action="/userlocal" method="POST" validateForm()>
            
@@ -85,27 +164,42 @@
                     <label for="floatingInput">Telefono</label> 
                 </div>
                 <div class="col-3 form-floating">
-                    <select class="form-select mb-3" name="t_reservacion" value="{{t_reservacion}}" required>
-                        <option value="Local"></option>
-                        <option value="Local">Local</option>
-                        <option value="Extras">Extras</option>
+                    <select class="form-select mb-3" name="t_reservacion" id="t_reservacion" value="{{t_reservacion}}" onchange="calcularTotal()">
+                        <option value="" data-precio="0"></option>
+                        <option value="Planta Alta $125" data-precio="125">Planta Alta $125</option>
+                        <option value="Planta baja $150" data-precio="150">Planta baja $150</option>
+                        <option value="Local Completo $225" data-precio="225">Local Completo $225</option>
                     </select>
                     <label for="floatingInput">Tipo de Reservacion</label>
                 </div>
+                <div class="col-3 form-floating">
+                    <input type="text" class="form-control mb-3"  placeholder="Cantidad Mesas" name="c_mesas" id="c_mesas" value="{{c_mesas}}" required oninput="calcularTotal()">
+                    <label for="floatingInput">Cantidad Mesas</label> 
+                </div>
+
+                <div class="col-3 form-floating">
+                    <input type="text" class="form-control mb-3"  placeholder="Cantidad Sillas" name="c_sillas" value="{{c_sillas}}" id="c_sillas" required oninput="calcularTotal()">
+                    <label for="floatingInput">Cantidad Sillas</label> 
+                </div>
+                <div class="col-3 form-floating">  
+                    <input type="text" class="form-control mb-3"  placeholder="Cantidad Manteles" name="c_manteles" value="{{c_manteles}}" id="c_manteles" required oninput="calcularTotal()">
+                    <label for="floatingInput">Cantidad Manteles</label>                
+                </div>
                 
                 <div class="col-3 form-floating">
-                    <input type="date" class="form-control" id="floatingInput" placeholder="fecha" name="fecha" value="{{fecha}}" required>
+                    <input type="date" class="form-control" placeholder="fecha" name="fecha" id="fechaInput" value="{{fecha}}" required>
                     <label for="floatingInput">Fecha a Rentar</label> 
                 </div>
 
                 <div class="col-3 form-floating">
-                    <input type="text" class="form-control mb-3" id="floatingInput" placeholder="total" name="total" value="{{total}}" required>
+                    <input type="text" class="form-control mb-3"  placeholder="total" name="total" value="{{total}}" id="total" required>
                     <label for="floatingInput">Total</label> 
                 </div>
 
                 <div class="col-3 form-floating">
-                    <select class="form-select mb-3" name="pago" value="{{pago}}" required>
-                        <option value="Local"></option>
+                    <select class="form-select mb-3" name="pago" value="{{pago}}" id="pago" required>
+                        <option value=""></option>
+                        <option value="Inventario Devuelto">Inventario Devuelto</option>
                         <option value="Pagado">Pagado</option>
                         <option value="Pendiente">Pendiente</option>
                     </select>
@@ -127,7 +221,7 @@
             </div>
         </form>
         
-        <table id="dataTable"  class="table table-bordered table-gris">
+        <table id="dataTable" class="table table-bordered table-gris">
             <thead>
                 <th scope="col" class="text">#</th>
                 <th scope="col" class="text">Nombre</th>
@@ -135,6 +229,9 @@
                 <th scope="col" class="text">DUI</th>
                 <th scope="col" class="text">Telefono</th>
                 <th scope="col" class="text">Tipo de Reservacion</th>
+                <th scope="col" class="text">Cantidad Mesas</th>
+                <th scope="col" class="text">Cantidad Sillas</th>
+                <th scope="col" class="text">Cantidad Manteles</th>
                 <th scope="col" class="text">Fecha</th>
                 <th scope="col" class="text">Total</th>
                 <th scope="col" class="text">Pago</th>
@@ -151,6 +248,9 @@
                     <td>{{d.DUI}}</td>
                     <td>{{d.telefono}}</td>
                     <td>{{d.t_reservacion}}</td>
+                    <td>{{d.c_mesas}}</td>
+                    <td>{{d.c_sillas}}</td>
+                    <td>{{d.c_manteles}}</td>
                     <td>{{d.fecha}}</td>
                     <td>{{d.total}}</td>
                     <td>{{d.pago}}</td>
@@ -186,11 +286,29 @@
                                         <input type="text" class="form-control mb-3" name="telefono" value="{{d.telefono}}">
                                     </div>
                                     <div class="col-3">
-                                        <label class="text">Tipo de Reservacion</label>
-                                        <select class="form-select mb-3" name="t_reservacion">
-                                            <option value="Local">Local</option>
-                                            <option value="Extras">Extras</option>
+                                        <select class="form-select mb-3" name="t_reservacion" id="t_reservacion" value="{{d.t_reservacion}}" onchange="calcularTotalEditar()">
+                                            
+                                            <option value="Planta Alta $125" data-precio="125">Planta Alta $125</option>
+                                            <option value="Planta baja $150" data-precio="150">Planta baja $150</option>
+                                            <option value="Local Completo $225" data-precio="225">Local Completo $225</option>
                                         </select>
+                                        <label class="text">Tipo de Reservacion</label>
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="text-primary">Cantidad Mesas</label> 
+                                        <input type="text" class="form-control mb-3" name="c_mesas" id="c_mesasEditar{{d.id}}" value="{{d.c_mesas}}" required oninput="calcularTotalEditar('{{d.id}}')">
+                                       
+                                    </div>
+                    
+                                    <div class="col-3">
+                                        <label class="text-primary">Cantidad Sillas</label> 
+                                        <input type="text" class="form-control mb-3" name="c_sillas" id="c_sillasEditar{{d.id}}" value="{{d.c_sillas}}" required oninput="calcularTotalEditar('{{d.id}}')">
+                                       
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="text-primary">Cantidad Manteles</label> 
+                                        <input type="text" class="form-control mb-3" name="c_manteles" id="c_mantelesEditar{{d.id}}" value="{{d.c_manteles}}" required oninput="calcularTotalEditar('{{d.id}}')">
+                                       
                                     </div>
                                     <div class="col-3">
                                         <label class="text-primary">Fecha</label>
@@ -198,14 +316,14 @@
                                     </div>
                                     <div class="col-3">
                                         <label class="text-primary">Total</label>
-                                        <input type="text" class="form-control mb-3" name="total" value="{{d.total}}">
+                                        <input type="text" class="form-control mb-3" name="total" id="totalEditar{{d.id}}" value="{{d.total}}" required>
                                     </div>
                                     <div class="col-3">
                                         <label class="text">Pago</label>
-                                        <select class="form-select mb-3" name="pago">
+                                        <select class="form-select mb-3" name="pago" value="{{d.pago}}">
+                                            <option value="Inventario Devuelto">Inventario Devuelto</option>
                                             <option value="Pagado">Pagado</option>
                                             <option value="Pendiente">Pendiente</option>
-                                            
                                         </select>
                                     </div>
                                   

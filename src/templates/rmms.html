@@ -100,19 +100,7 @@
     });
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var valor_t_reservacion = "{{t_reservacion}}"; // Suponiendo que t_reservacion está disponible en el contexto
 
-        var selectElement = document.getElementById('t_reservacion');
-        for (var i = 0; i < selectElement.options.length; i++) {
-            if (selectElement.options[i].value === valor_t_reservacion) {
-                selectElement.options[i].selected = true;
-                break;
-            }
-        }
-    });
-</script>
 
   <h1 class="text-center mt-5 mb-5 text">Alquiler Sillas|Mesas|Manteles</h1>  
   <div class="container">
@@ -123,6 +111,7 @@
     {% endif %} 
   <div class="container">
     <div class="card shadow">
+        
         <div class="card-body">
             <div data-bs-theme="dark" class="d-flex">
                 
@@ -133,14 +122,7 @@
         </div>
         <form action="/user" method="POST" validateForm()>
             <div class="row mb-3">
-                <div class="col-3">
-                    <label class="text">TipoReservacion</label>
-                    <select class="form-select mb-3" name="t_reservacion" value="{{t_reservacion}}" id="t_reservacion" required>
-                        <option value=""></option>
-                        <option value="En Local">En Local</option>
-                        <option value="Fuera de Local">Fuera de Local</option>
-                    </select>
-                </div>
+                
                 <div class="col-3">
                     <label class="text">Nombre</label> 
                     <input type="text" class="form-control mb-3" name="nombres" value="{{nombres}}" required>
@@ -188,7 +170,7 @@
                 </div>
                 <div class="col-3">
                     <label class="text">Pago</label>
-                    <select class="form-select mb-3" name="pago" value="{{pago}}" id="pago"  required>
+                    <select class="form-select mb-3" name="pago" value="{{pago}}" id="pago" required>
                         <option value=""></option>
                         <option value="pendiente">Pendiente</option>
                         <option value="pagado">Pagado</option>
@@ -209,7 +191,7 @@
         <table id="dataTable" class="table table-bordered table-gris">
             <thead>
                 <th scope="col" class="text">#</th>
-                <th scope="col" class="text">TipoReservacion</th>
+                
                 <th scope="col" class="text">Nombres</th>
                 <th scope="col" class="text">Apellidos</th>
                 <th scope="col" class="text">DUI</th>
@@ -228,7 +210,7 @@
                 {% for d in data %}
                 <tr>
                     <td>{{d.id}}</td>
-                    <td>{{d.t_reservacion}}</td>
+                    
                     <td>{{d.nombres}}</td>
                     <td>{{d.apellidos}}</td>
                     <td>{{d.DUI}}</td>
@@ -254,13 +236,7 @@
                             </div>
                             <div class="modal-body">
                                 <form action="/edit/{{d.id}}" method="post" id="formEditar{{d.id}}">
-                                    <div class="col-3">
-                                        <label class="text">TipoReservacion</label>
-                                        <select class="form-select mb-3" name="t_reservacion" value="{{d.t_reservacion}}">
-                                            <option value="En Local">En Local</option>
-                                            <option value="Fuera de Local">Fuera de Local</option>
-                                        </select>
-                                    </div>
+                                   
                                     <div class="col-3">
                                         <label class="text-primary">Nombre</label>
                                         <input type="text" class="form-control mb-3" name="nombres" value="{{d.nombres}}">
@@ -307,10 +283,12 @@
                                     </div>
                                     <div class="col-3">
                                         <label class="text">Pago</label>
-                                        <select class="form-select mb-3" name="pago" id="totalEditar" value="{{d.total}}" required>
+                                        <select class="form-select mb-3" name="pago" value="{{d.pago}}" required>
 
                                             <option value="pendiente">Pendiente</option>
                                             <option value="pagado">Pagado</option>
+                                            <option value="Inventario devuelto">Inventario devuelto</option>
+
                                         </select>
                                     </div>
                                     

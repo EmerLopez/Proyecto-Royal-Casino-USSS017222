@@ -96,3 +96,16 @@ font-family: 'Lobster', cursive;
   padding: 20px;
   border-radius: 20px;
 }
+table {
+  width: 5%;
+  height: 20px;
+}
+
+.btn-logout {
+  text-decoration: none;
+  background-color: #495057;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+ 
+}
